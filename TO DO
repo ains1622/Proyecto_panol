@@ -1,0 +1,30 @@
+Para el front end se necesita que:
+    -Grid system
+    -Diseño responsivo 6 canales
+    -BS Flex
+    -BS Cards
+    -Diseño de colores (Pantoma, Barra Colores)
+    -Distribucion de simetria
+    -Ritmo grafico
+Para el back end se necesita que:
+    -Diagrama de clases *EN PROCESO*
+    -API escalable
+    -Definicion generica
+    -Definicion generica de metodos
+    -Reglas individuales de parametros
+    -Reglas de negocio de parametros
+    -Testing de servicios (sandbox)
+Para la integracion de back y front se necesita que:
+    -Metodos de transformacion API Web
+    -Integración de Querys con API Web
+    -Integración de Mutation con API Web
+    -Procesamiento de datos e informes
+    -Representación visual de datos e informes
+    -Integración de estadisticas e informes
+Para IOT se necesita que:
+    -Simulacion de sensor
+    -Simulacion de Actuador
+    -Flujo de sensores
+    -Flujo de aprendizaje de datos
+    -Gemelos Digitales
+    -Analisis no supervisado de datos
