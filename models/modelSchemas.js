@@ -1,69 +1,131 @@
 const mongoose = require('mongoose');
 
+// A quien se le presta
 const usuarioSchema = new mongoose.Schema({
     nombre: String,
     run: String,
     correo: String,
     telefono: String
 });
-
 const estudianteSchema = new mongoose.Schema({
-    carrera: String
+    carrera: carreraSchema,
+    usuario: usuarioSchema
 });
 const docenteSchema = new mongoose.Schema({
     ramo: String,
-    escuela: String
+    escuela: String,
+    usuario: usuarioSchema,
+    sede: sedeSchema
 });
 
 const carreraSchema = new mongoose.Schema({
     nombre: String,
-    escuela: String
+    escuela: String,
+    sede: sedeSchema
 });
 
+// Esquemas geograficos
 const sedeSchema = new mongoose.Schema({
     nombre: String,
     direccion: String,
-    comuna: String
+    comuna: comunaSchema
 });
 const regionSchema = new mongoose.Schema({
     nombre: String
 });
 const ciudadSchema = new mongoose.Schema({
-    nombre: String
+    nombre: String,
+    region: regionSchema
 });
 const comunaSchema = new mongoose.Schema({
-    nombre: String
+    nombre: String,
+    ciudad: ciudadSchema
 });
 
-
+// Que se presta
 const equipoSchema = new mongoose.Schema({
     nombre: String,
     codigo: String,
-    cantidad: Number
+    cantidad: Number,
+    sede: sedeSchema
 });
 const herramientaSchema = new mongoose.Schema({
     nombre: String,
     cantidad: Number,
-    codigo: String
+    codigo: String,
+    sede: sedeSchema
 });
 
 const materialSchema = new mongoose.Schema({
     nombre: String,
     cantidad: Number,
-    codigo: String
+    codigo: String,
+    sede: sedeSchema
 });
 
-const Estudiante = Usuario.discriminator('Estudiante', estudianteSchema);
-const Docente = Usuario.discriminator('Docente', docenteSchema);
-const Usuario = Sede.discriminator('Usuario', usuarioSchema);
-const Carrera = Sede.discriminator('Carrera', carreraSchema);
-const Equipo = Sede.discriminator('Equipo', equipoSchema);
-const Herramienta = Sede.discriminator('Herramienta', herramientaSchema);
-const Material = Sede.discriminator('Material', materialSchema);
-const Sede = Comuna.discriminator('Sede', sedeSchema);
-const Ciudad = Region.discriminator('Ciudad', ciudadSchema);
-const Comuna = Ciudad.discriminator('Comuna', comunaSchema);
+// Prestamos a usuarios de pañol
+const prestamoSchema = new mongoose.Schema({
+    fecha: Date,
+    devolucion: Date,
+    cantidad: Number,
+});
+const prestamoEquipoESchema = new mongoose.Schema({
+    equipo: equipoSchema,
+    prestamo: prestamoSchema,
+    estudiante: estudianteSchema
+});
+const prestamoEquipoDSchema = new mongoose.Schema({
+    equipo: equipoSchema,
+    prestamo: prestamoSchema,
+    docente: docenteSchema
+});
+const prestamoHerramientaESchema = new mongoose.Schema({
+    herramienta: herramientaSchema,
+    prestamo: prestamoSchema,
+    estudiante: estudianteSchema
+});
+const prestamoHerramientaDSchema = new mongoose.Schema({
+    herramienta: herramientaSchema,
+    prestamo: prestamoSchema,
+    docente: docenteSchema
+});
+const prestamoMaterialESchema = new mongoose.Schema({
+    material: materialSchema,
+    prestamo: prestamoSchema,
+    estudiante: estudianteSchema
+});
+const prestamoMaterialDSchema = new mongoose.Schema({
+    material: materialSchema,
+    prestamo: prestamoSchema,
+    docente: docenteSchema
+});
+
+// Usuarios de pañol
+const Estudiante = mongoose.model('Estudiante', estudianteSchema);
+const Docente = mongoose.model('Docente', docenteSchema);
+const Usuario = mongoose.model('Usuario', usuarioSchema);
+
+const Carrera = mongoose.model('Carrera', carreraSchema);
+
+// Elementos de pañol
+const Equipo = mongoose.model('Equipo', equipoSchema);
+const Herramienta = mongoose.model('Herramienta', herramientaSchema);
+const Material = mongoose.model('Material', materialSchema);
+
+// Esquemas geograficos
+const Sede = mongoose.model('Sede', sedeSchema);
+const Ciudad = mongoose.model('Ciudad', ciudadSchema);
+const Comuna = mongoose.model('Comuna', comunaSchema);
 const Region = mongoose.model('Region', regionSchema);
 
+// Prestamos
+const Prestamo = mongoose.model('Prestamo', prestamoSchema);
+const PrestamoEquipoE = mongoose.model('PrestamoEquipoE', prestamoEquipoESchema);
+const PrestamoEquipoD = mongoose.model('PrestamoEquipoD', prestamoEquipoDSchema);
+const PrestamoHerramientaE = mongoose.model('PrestamoHerramientaE', prestamoHerramientaESchema);
+const PrestamoHerramientaD = mongoose.model('PrestamoHerramientaD', prestamoHerramientaDSchema);
+const PrestamoMaterialE = mongoose.model('PrestamoMaterialE', prestamoMaterialESchema);
+const PrestamoMaterialD = mongoose.model('PrestamoMaterialD', prestamoMaterialDSchema);
 
-module.exports = { Equipo, Estudiante, Usuario, Docente, Carrera, Sede, Herramienta, Material, Ciudad, Comuna, Region };
+module.exports = { Equipo, Estudiante, Usuario, Docente, Carrera, Sede, Herramienta, Material, Ciudad, Comuna, Region, Prestamo, PrestamoEquipoE, PrestamoEquipoD,
+     PrestamoHerramientaE, PrestamoHerramientaD, PrestamoMaterialE, PrestamoMaterialD };
