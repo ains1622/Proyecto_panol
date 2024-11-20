@@ -28,14 +28,14 @@ const typeDefs = gql`
     type Herramienta {
         id: ID!
         nombre: String!
-        codigo: String!
+        codigo: Int!
         cantidad: Int!
         sede: Sede!
     }
     """ Definicion de input para Herramienta  """ 
     input HerramientaInput {
         nombre: String!
-        codigo: String!
+        codigo: Int!
         cantidad: Int!
         sede: SedeInput!
     }
@@ -45,14 +45,14 @@ const typeDefs = gql`
         id: ID!
         nombre: String!
         cantidad: Int!
-        codigo: String!
+        codigo: Int!
         sede: Sede!
     }
     """ Definicion de input para Material  """ 
     input MaterialInput {
         nombre: String!
         cantidad: Int!
-        codigo: String!
+        codigo: Int!
         sede: SedeInput!
     }
 
@@ -274,11 +274,110 @@ const typeDefs = gql`
         sede: SedeInput!
     }
 
+    union PrestamosEquiposUnion = PrestamosEquiposE | PrestamosEquiposD
+    union PrestamosHerramientasUnion = PrestamosHerramientasE | PrestamosHerramientasD
+    union PrestamosMaterialesUnion = PrestamosMaterialesE | PrestamosMaterialesD
+
+    union UsuariosUnion = Estudiante | Docente
     type Query{
+
+        """ QUERIES DE OBJETOS """
         """ Queries de Equipo  """ 
         getEquipos: [Equipo]
         getEquipo(id: ID!): Equipo
         getEquiposBySede(sede: String!): [Equipo]
+        getEquiposByNombre(nombre: String!): [Equipo]
+        getEquipoByCodigo(codigo: Int!): Equipo
+
+        """ Queries de Herramienta  """
+        getHerramientas: [Herramienta]
+        getHerramienta(id: ID!): Herramienta
+        getHerramientasBySede(sede: String!): [Herramienta]
+        getHerramientasByNombre(nombre: String!): [Herramienta]
+        getHerramientaByCodigo(codigo: Int!): Herramienta
+
+        """ Queries de Material  """
+        getMateriales: [Material]
+        getMaterial(id: ID!): Material
+        getMaterialesBySede(sede: String!): [Material]
+        getMaterialesByNombre(nombre: String!): [Material]
+        getMaterialByCodigo(codigo: Int!): Material
+
+        """ QUERIES GEOGRAFICAS """
+        """ Queries de Sede """
+        getSedes: [Sede]
+        getSede(id: ID!): Sede
+        getSedesByComuna(comuna: String!): [Sede]
+        getSedeByNombre(nombre: String!): Sede
+
+        """ Queries de Comuna """
+        getComunas: [Comuna]
+        getComuna(id: ID!): Comuna
+        getComunasByCiudad(ciudad: String!): [Comuna]
+        getComunaByNombre(nombre: String!): Comuna
+
+        """ Queries de Ciudad """
+        getCiudades: [Ciudad]
+        getCiudad(id: ID!): Ciudad
+        getCiudadesByRegion(region: String!): [Ciudad]
+        getCiudadByNombre(nombre: String!): Ciudad
+
+        """ Queries de Region """
+        getRegiones: [Region]
+        getRegion(id: ID!): Region
+        getRegionByNombre(nombre: String!): Region
+
+        """ QUERIES DE PRESTAMOS """
+        """ Queries de Prestamo Equipo """
+        getPrestamosEquipos: [PrestamoEquipoUnion]
+        getPrestamosByNombreEquipo(nombre: String!): [PrestamoEquipoUnion]
+        getPrestamosByCodigoEquipo(codigo: Int!): [PrestamoEquipoUnion]
+        getPrestamosEquipoByEstudiante(estudiante: String!): [PrestamoEquipoE]
+        getPrestamosEquipoByDocente(docente: String!): [PrestamoEquipoD]
+
+        """ Queries de Prestamo Herramienta """
+        getPrestamosHerramientas: [PrestamoHerramientaUnion]
+        getPrestamosByNombreHerramienta(nombre: String!): [PrestamoHerramientaUnion]
+        getPrestamosByCodigoHerramienta(codigo: Int!): [PrestamoHerramientaUnion]
+        getPrestamosHerramientaByEstudiante(estudiante: String!): [PrestamoHerramientaE]
+        getPrestamosHerramientaByDocente(docente: String!): [PrestamoHerramientaD]
+
+        """ Queries de Prestamo Material """
+        getPrestamosMateriales: [PrestamoMaterialUnion]
+        getPrestamosByNombreMaterial(nombre: String!): [PrestamoMaterialUnion]
+        getPrestamosByCodigoMaterial(codigo: Int!): [PrestamoMaterialUnion]
+        getPrestamosMaterialByEstudiante(estudiante: String!): [PrestamoMaterialE]
+        getPrestamosMaterialByDocente(docente: String!): [PrestamoMaterialD]
+
+        """ QUERIES DE USUARIOS """
+        """ Queries de Estudiante """
+        getEstudiantes: [Estudiante]
+        getEstudiante(id: ID!): Estudiante
+        getEstudiantesByCarrera(carrera: String!): [Estudiante]
+        getEstudiantesByNombre(nombre: String!): [Estudiante]
+        getEstudianteByRut(rut: String!): Estudiante
+
+        """ Queries de Docente """
+        getDocentes: [Docente]
+        getDocente(id: ID!): Docente
+        getDocentesByEscuela(escuela: String!): [Docente]
+        getDocentesByNombre(nombre: String!): [Docente]
+        getDocentesByRamo(ramo: String!): [Docente]
+
+        """ Queries de usuarios"""
+        getUsuarios: [UsuariosUnion]
+        getUsuario(id: ID!): UsuariosUnion
+        getUsuariosByNombre(nombre: String!): [UsuariosUnion]
+        getUsuariosBySede(sede: String!): [UsuariosUnion]
+
+        """ QUERIES DE CARRERAS """
+        """ Queries de Carrera """
+        getCarreras: [Carrera]
+        getCarrera(id: ID!): Carrera
+        getCarrerasByEscuela(escuela: String!): [Carrera]
+        getCarrerasByNombre(nombre: String!): [Carrera]
+        getCarrerasBySede(sede: String!): [Carrera]
+        
     }
     type Mutation {
         """  Mutations de Equipo """ 
