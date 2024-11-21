@@ -1,5 +1,29 @@
 const mongoose = require('mongoose');
 
+const regionSchema = new mongoose.Schema({
+    nombre: String
+});
+const ciudadSchema = new mongoose.Schema({
+    nombre: String,
+    region: regionSchema
+});
+const comunaSchema = new mongoose.Schema({
+    nombre: String,
+    ciudad: ciudadSchema
+});
+
+const sedeSchema = new mongoose.Schema({
+    nombre: String,
+    direccion: String,
+    comuna: comunaSchema
+});
+
+const carreraSchema = new mongoose.Schema({
+    nombre: String,
+    escuela: String,
+    sede: sedeSchema
+});
+
 // A quien se le presta
 const usuarioSchema = new mongoose.Schema({
     nombre: String,
@@ -18,29 +42,8 @@ const docenteSchema = new mongoose.Schema({
     sede: sedeSchema
 });
 
-const carreraSchema = new mongoose.Schema({
-    nombre: String,
-    escuela: String,
-    sede: sedeSchema
-});
-
 // Esquemas geograficos
-const sedeSchema = new mongoose.Schema({
-    nombre: String,
-    direccion: String,
-    comuna: comunaSchema
-});
-const regionSchema = new mongoose.Schema({
-    nombre: String
-});
-const ciudadSchema = new mongoose.Schema({
-    nombre: String,
-    region: regionSchema
-});
-const comunaSchema = new mongoose.Schema({
-    nombre: String,
-    ciudad: ciudadSchema
-});
+
 
 // Que se presta
 const equipoSchema = new mongoose.Schema({

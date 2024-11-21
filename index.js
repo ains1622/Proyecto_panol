@@ -26,6 +26,9 @@ const corsOptions = {
     credentials: false
 };
 
+const app = express();
+app.use(cors());
+
 async function startServer(){
     const apolloServer = new ApolloServer({ typeDefs, resolvers, corsOptions });
     await apolloServer.start();
@@ -34,8 +37,6 @@ async function startServer(){
 
 startServer();
 
-const app = express();
-app.use(cors());
 app.listen(8080, function(){
     console.log('Servidor iniciado en http://localhost:8080');
 });

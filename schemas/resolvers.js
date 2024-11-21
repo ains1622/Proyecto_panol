@@ -8,10 +8,10 @@ const resolvers = {
     PrestamosEquiposUnion: {
         __resolveType(obj){
             if (obj.estudiante && obj.estudiante.carrera){
-                return 'PrestamosEquiposE';
+                return 'PrestamoEquipoE';
             }
             if (obj.docente && obj.docente.ramo) {
-                return 'PrestamosEquiposD';
+                return 'PrestamoEquipoD';
             }
             return null;
         }
@@ -19,10 +19,10 @@ const resolvers = {
     PrestamosHerramientasUnion: {
         __resolveType(obj){
             if (obj.estudiante && obj.estudiante.carrera){
-                return 'PrestamosHerramientasE';
+                return 'PrestamoHerramientE';
             }
             if (obj.docente && obj.docente.ramo) {
-                return 'PrestamosHerramientasD';
+                return 'PrestamoHerramientD';
             }
             return null;
         }
@@ -30,10 +30,10 @@ const resolvers = {
     PrestamosMaterialesUnion: {
         __resolveType(obj){
             if (obj.estudiante && obj.estudiante.carrera){
-                return 'PrestamosMaterialsE';
+                return 'PrestamoMaterialE';
             }
             if (obj.docente && obj.docente.ramo) {
-                return 'PrestamosMaterialsD';
+                return 'PrestamoMaterialD';
             }
             return null;
         }
@@ -202,11 +202,11 @@ const resolvers = {
             return prestamos;
         },
         async getPrestamosEquipoByEstudiante (obj, { nombre }) {
-            const prestamos = await PrestamoEquipoE.find({'estudiante.nombre': nombre});
+            const prestamos = await PrestamoEquipoE.find({'estudiante.usuario.nombre': nombre});
             return prestamos;
         },
         async getPrestamosEquipoByDocente (obj, { nombre }) {
-            const prestamos = await PrestamoEquipoD.find({'docente.nombre': nombre});
+            const prestamos = await PrestamoEquipoD.find({'docente.usuario.nombre': nombre});
             return prestamos;
         },
         async getPrestamosHerramientas (obj) {
@@ -231,11 +231,11 @@ const resolvers = {
             return prestamos;
         },
         async getPrestamosHerramientasByEstudiante (obj, { nombre }) {
-            const prestamos = await PrestamoHerramientaE.find({'estudiante.nombre': nombre});
+            const prestamos = await PrestamoHerramientaE.find({'estudiante.usuario.nombre': nombre});
             return prestamos;
         },
         async getPrestamosHerramientasByDocente (obj, { nombre }) {
-            const prestamos = await PrestamoHerramientaD.find({'docente.nombre': nombre});
+            const prestamos = await PrestamoHerramientaD.find({'docente.usuario.nombre': nombre});
             return prestamos;
         },
         async getPrestamosMateriales (obj) {
@@ -260,11 +260,11 @@ const resolvers = {
             return prestamos;
         },
         async getPrestamosMaterialesByEstudiante (obj, { nombre }) {
-            const prestamos = await PrestamoMaterialE.find({'estudiante.nombre': nombre});
+            const prestamos = await PrestamoMaterialE.find({'estudiante.usuario.nombre': nombre});
             return prestamos;
         },
         async getPrestamosMaterialesByDocente (obj, { nombre }) {
-            const prestamos = await PrestamoMaterialD.find({'docente.nombre': nombre});
+            const prestamos = await PrestamoMaterialD.find({'docente.usuario.nombre': nombre});
             return prestamos;
         },
 
@@ -450,36 +450,257 @@ const resolvers = {
         },
 
         // Mutations de Prestamos
-        async addPrestamoEquipoE(obj, { input }) {
-            const prestamo = new PrestamoEquipoE(input);
-            await prestamo.save();
-            return prestamo;
+        async addPrestamoEquipoE(parent, { input }, context, info) {
+            const { estudiante, prestamo, sede, equipo } = input;
+            
+            try {
+                // Validar que el estudiante existe
+                const estudianteExistente = await Estudiante.findOne({ 'usuario.rut': estudiante.usuario.rut });
+                if (!estudianteExistente) {
+                  throw new Error("Estudiante no encontrado");
+                }
+        
+                // Validar que el equipo existe
+                const equipoExistente = await Equipo.findOne({ codigo: equipo.codigo });
+                if (!equipoExistente) {
+                  throw new Error("Equipo no encontrado");
+                }
+        
+                // Validar que la sede existe
+                const sedeExistente = await Sede.findOne({ nombre: sede.nombre });
+                if (!sedeExistente) {
+                  throw new Error("Sede no encontrada");
+                }
+        
+                // Crear el objeto Prestamo
+                const nuevoPrestamo = new Prestamo({
+                  cantidad: prestamo.cantidad,
+                  fecha: prestamo.fecha,
+                  devolucion: prestamo.devolucion,
+                  estudiante: estudianteExistente._id,  // Asociar el estudiante
+                  equipo: equipoExistente._id,  // Asociar el equipo
+                  sede: sedeExistente._id   // Asociar la sede
+                });
+        
+                // Guardar el nuevo préstamo
+                await nuevoPrestamo.save();
+        
+                // Opcional: Actualizar la cantidad del equipo, si es necesario
+                equipoExistente.cantidad -= prestamo.cantidad; // Restamos la cantidad prestada
+                await equipoExistente.save();
+        
+                return nuevoPrestamo; // Devuelve el préstamo agregado
+              } catch (error) {
+                throw new Error("Error al agregar el préstamo: " + error.message);
+              }
         },
-        async updatePrestamoEquipoE(obj, { id, input }) {
-            const prestamo = await PrestamoEquipoE.findByIdAndUpdate(id, input, { new: true });
-            return prestamo;
+        async updatePrestamoEquipoE(parent, { input }, context, info) {
+            const { prestamoId, estudiante, prestamo, sede, equipo } = input;
+      
+            try {
+              // Buscar el préstamo existente
+              const prestamoExistente = await Prestamo.findById(prestamoId);
+              if (!prestamoExistente) {
+                throw new Error("Prestamo no encontrado");
+              }
+      
+              // Validar si el estudiante existe (se puede actualizar solo el estudiante)
+              if (estudiante) {
+                const estudianteExistente = await Estudiante.findOne({ 'usuario.rut': estudiante.usuario.rut });
+                if (!estudianteExistente) {
+                  throw new Error("Estudiante no encontrado");
+                }
+                prestamoExistente.estudiante = estudianteExistente._id;  // Asociar el estudiante
+              }
+      
+              // Validar si el equipo existe y si la cantidad de equipo cambia
+              if (equipo) {
+                const equipoExistente = await Equipo.findOne({ codigo: equipo.codigo });
+                if (!equipoExistente) {
+                  throw new Error("Equipo no encontrado");
+                }
+                // Si la cantidad del préstamo cambia, debes actualizar la cantidad disponible en el equipo
+                const cantidadPrestada = prestamoExistente.cantidad - prestamo.cantidad;  // Calcular diferencia
+                equipoExistente.cantidad -= cantidadPrestada; // Actualizar cantidad
+                await equipoExistente.save();
+                prestamoExistente.equipo = equipoExistente._id;  // Asociar el equipo
+              }
+      
+              // Validar si la sede existe
+              if (sede) {
+                const sedeExistente = await Sede.findOne({ nombre: sede.nombre });
+                if (!sedeExistente) {
+                  throw new Error("Sede no encontrada");
+                }
+                prestamoExistente.sede = sedeExistente._id;  // Asociar la sede
+              }
+      
+              // Actualizar los detalles del préstamo si los campos fueron enviados
+              if (prestamo) {
+                prestamoExistente.cantidad = prestamo.cantidad || prestamoExistente.cantidad;
+                prestamoExistente.fecha = prestamo.fecha || prestamoExistente.fecha;
+                prestamoExistente.devolucion = prestamo.devolucion || prestamoExistente.devolucion;
+              }
+      
+              // Guardar el préstamo actualizado
+              await prestamoExistente.save();
+      
+              return prestamoExistente;  // Devuelve el préstamo actualizado
+            } catch (error) {
+              throw new Error("Error al actualizar el préstamo: " + error.message);
+            }
         },
         async deletePrestamoEquipoE(obj, { id }) {
             await PrestamoEquipoE.findByIdAndDelete(id);
             return { message: 'Prestamo eliminado' };
         },
-        async addPrestamoEquipoD(obj, { input }) {
-            const prestamo = new PrestamoEquipoD(input);
-            await prestamo.save();
-            return prestamo;
+        async addPrestamoEquipoD(parent, { input }, context, info) {
+            const { docente, prestamo, sede, equipo } = input;
+            
+            try {
+                // Validar que el docente existe
+                const docenteExistente = await Docente.findOne({ 'usuario.rut': docente.usuario.rut });
+                if (!docenteExistente) {
+                  throw new Error("Docente no encontrado");
+                }
+        
+                // Validar que el equipo existe
+                const equipoExistente = await Equipo.findOne({ codigo: equipo.codigo });
+                if (!equipoExistente) {
+                  throw new Error("Equipo no encontrado");
+                }
+        
+                // Validar que la sede existe
+                const sedeExistente = await Sede.findOne({ nombre: sede.nombre });
+                if (!sedeExistente) {
+                  throw new Error("Sede no encontrada");
+                }
+        
+                // Crear el objeto Prestamo
+                const nuevoPrestamo = new Prestamo({
+                  cantidad: prestamo.cantidad,
+                  fecha: prestamo.fecha,
+                  devolucion: prestamo.devolucion,
+                  docente: docenteExistente._id,  // Asociar el docente
+                  equipo: equipoExistente._id,  // Asociar el equipo
+                  sede: sedeExistente._id   // Asociar la sede
+                });
+        
+                // Guardar el nuevo préstamo
+                await nuevoPrestamo.save();
+        
+                // Opcional: Actualizar la cantidad del equipo, si es necesario
+                equipoExistente.cantidad -= prestamo.cantidad; // Restamos la cantidad prestada
+                await equipoExistente.save();
+        
+                return nuevoPrestamo; // Devuelve el préstamo agregado
+              } catch (error) {
+                throw new Error("Error al agregar el préstamo: " + error.message);
+              }
         },
-        async updatePrestamoEquipoD(obj, { id, input }) {
-            const prestamo = await PrestamoEquipoD.findByIdAndUpdate(id, input, { new: true });
-            return prestamo;
+        async updatePrestamoEquipoD(parent, { input }, context, info) {
+            const { prestamoId, docente, prestamo, sede, equipo } = input;
+      
+            try {
+              // Buscar el préstamo existente
+              const prestamoExistente = await Prestamo.findById(prestamoId);
+              if (!prestamoExistente) {
+                throw new Error("Prestamo no encontrado");
+              }
+      
+              // Validar si el docente existe
+              if (docente) {
+                const docenteExistente = await Docente.findOne({ 'usuario.rut': docente.usuario.rut });
+                if (!docenteExistente) {
+                  throw new Error("Docente no encontrado");
+                }
+                prestamoExistente.docente = docenteExistente._id;  // Asociar el docente
+              }
+      
+              // Validar si el equipo existe y si la cantidad de equipo cambia
+              if (equipo) {
+                const equipoExistente = await Equipo.findOne({ codigo: equipo.codigo });
+                if (!equipoExistente) {
+                  throw new Error("Equipo no encontrado");
+                }
+                // Si la cantidad del préstamo cambia, debes actualizar la cantidad disponible en el equipo
+                const cantidadPrestada = prestamoExistente.cantidad - prestamo.cantidad;  // Calcular diferencia
+                equipoExistente.cantidad -= cantidadPrestada; // Actualizar cantidad
+                await equipoExistente.save();
+                prestamoExistente.equipo = equipoExistente._id;  // Asociar el equipo
+              }
+      
+              // Validar si la sede existe
+              if (sede) {
+                const sedeExistente = await Sede.findOne({ nombre: sede.nombre });
+                if (!sedeExistente) {
+                  throw new Error("Sede no encontrada");
+                }
+                prestamoExistente.sede = sedeExistente._id;  // Asociar la sede
+              }
+      
+              // Actualizar los detalles del préstamo si los campos fueron enviados
+              if (prestamo) {
+                prestamoExistente.cantidad = prestamo.cantidad || prestamoExistente.cantidad;
+                prestamoExistente.fecha = prestamo.fecha || prestamoExistente.fecha;
+                prestamoExistente.devolucion = prestamo.devolucion || prestamoExistente.devolucion;
+              }
+      
+              // Guardar el préstamo actualizado
+              await prestamoExistente.save();
+      
+              return prestamoExistente;  // Devuelve el préstamo actualizado
+            } catch (error) {
+              throw new Error("Error al actualizar el préstamo: " + error.message);
+            }
         },
         async deletePrestamoEquipoD(obj, { id }) {
             await PrestamoEquipoD.findByIdAndDelete(id);
             return { message: 'Prestamo eliminado' };
         },
-        async addPrestamoHerramientaE(obj, { input }) {
-            const prestamo = new PrestamoHerramientaE(input);
-            await prestamo.save();
-            return prestamo;
+        async addPrestamoHerramientaE(parent, { input }, context, info) {
+            const { estudiante, prestamo, sede, equipo } = input;
+            
+            try {
+                // Validar que el estudiante existe
+                const estudianteExistente = await Estudiante.findOne({ 'usuario.rut': estudiante.usuario.rut });
+                if (!estudianteExistente) {
+                  throw new Error("Estudiante no encontrado");
+                }
+        
+                // Validar que la herramienta exista
+                const herramientaExistente = await Herramienta.findOne({ codigo: herramienta.codigo });
+                if (!herramientaExistente) {
+                  throw new Error("Herramienta no encontrado");
+                }
+        
+                // Validar que la sede existe
+                const sedeExistente = await Sede.findOne({ nombre: sede.nombre });
+                if (!sedeExistente) {
+                  throw new Error("Sede no encontrada");
+                }
+        
+                // Crear el objeto Prestamo
+                const nuevoPrestamo = new Prestamo({
+                  cantidad: prestamo.cantidad,
+                  fecha: prestamo.fecha,
+                  devolucion: prestamo.devolucion,
+                  estudiante: estudianteExistente._id,  // Asociar el estudiante
+                  herramienta: herramientaExistente._id,  // Asociar la herramienta
+                  sede: sedeExistente._id   // Asociar la sede
+                });
+        
+                // Guardar el nuevo préstamo
+                await nuevoPrestamo.save();
+        
+                // Actualizar la cantidad de herramientas
+                herraminetaExistente.cantidad -= prestamo.cantidad; // Restamos la cantidad prestada
+                await herramientaExistente.save();
+        
+                return nuevoPrestamo; // Devuelve el préstamo agregado
+              } catch (error) {
+                throw new Error("Error al agregar el préstamo: " + error.message);
+              }
         },
         async updatePrestamoHerramientaE(obj, { id, input }) {
             const prestamo = await PrestamoHerramientaE.findByIdAndUpdate(id, input, { new: true });
@@ -530,30 +751,33 @@ const resolvers = {
         },
 
         // Mutations de Usuarios
-        async addEstudiante(obj, { input }) {
-            const usuario = new Usuario(input.inpu);
-            const estudiante = new Estudiante(input);
+        async addEstudiante(parent, { input }) {
+            const usuario = new Usuario(input.usuario);
+            await usuario.save();
+            const estudiante = new Estudiante({ ...input, usuario: usuario._id });
             await estudiante.save();
             return estudiante;
         },
-        async updateEstudiante(obj, { id, input }) {
+        async updateEstudiante(parent, { id, input }) {
             const estudiante = await Estudiante.findByIdAndUpdate(id, input, { new: true });
             return estudiante;
         },
-        async deleteEstudiante(obj, { id }) {
+        async deleteEstudiante(parent, { id }) {
             await Estudiante.findByIdAndDelete(id);
             return { message: 'Estudiante eliminado' };
         },
-        async addDocente(obj, { input }) {
-            const docente = new Docente(input);
+        async addDocente(parent, { input }) {
+            const usuario = new Usuario(input.usuario);
+            await usuario.save();
+            const docente = new Docente({ ...input, usuario: usuario._id });
             await docente.save();
             return docente;
         },
-        async updateDocente(obj, { id, input }) {
+        async updateDocente(parent, { id, input }) {
             const docente = await Docente.findByIdAndUpdate(id, input, { new: true });
             return docente;
         },
-        async deleteDocente(obj, { id }) {
+        async deleteDocente(parent, { id }) {
             await Docente.findByIdAndDelete(id);
             return { message: 'Docente eliminado' };
         },
