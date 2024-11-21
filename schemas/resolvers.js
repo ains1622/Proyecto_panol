@@ -41,34 +41,62 @@ const resolvers = {
 
     Query: {
         // Querys de Equipos
-        async getEquipos (obj) {
-            const equipos = await Equipo.find();
-            return equipos;
+        async getEquipos(parent) {
+            try {
+              const equipos = await Equipo.find();
+              return equipos;
+            } catch (error) {
+              throw new Error(`Error al obtener los equipos: ${error.message}`);
+            }
         },
         async getEquipo (obj, { id } ) {
+            try{
             const equipo = await Equipo.findById(id);
             return equipo;
+            } catch (error) {
+                throw new Error(`Error: Equipo no encontrado: ${error.message}`);
+            }
         },
         async getEquiposBySede (obj, { sede } ) {
-            const equipos = await Equipo.find({'sede.nombre': sede});
-            return equipos;
+            try{
+                const equipos = await Equipo.find({'sede.nombre': sede});
+                return equipos;
+            } catch (error) {
+                throw new Error(`Error: Sede: ${error.message}`);
+            }
         },
         async getEquiposByComuna (obj, { comuna } ) {
-            const equipos = await Equipo.find({'sede.comuna.nombre': comuna});
-            return equipos;
+            try{
+                const equipos = await Equipo.find({'sede.comuna.nombre': comuna});
+                return equipos;
+            } catch (error) {   
+                throw new Error(`Error: Comuna: ${error.message}`);
+            }
         },
         async getEquiposByNombre (obj, { nombre } ) {
-            const equipos = await Equipo.find({nombre: nombre});
-            return equipos;
+            try{
+                const equipos = await Equipo.find({nombre: nombre});
+                return equipos;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getEquipoByCodigo (obj, { codigo } ) {
-            const equipo = await Equipo.findOne({codigo: codigo});
-            return equipo;
+            try{
+                const equipo = await Equipo.findOne({codigo: codigo});
+                return equipo;
+            } catch (error) {
+                throw new Error(`Error: Codigo: ${error.message}`);
+            }
         },
         // Querys de Estudiantes
         async getHerramientas (obj) {
-            const herramientas = await Herramienta.find();
-            return herramientas;
+            try {
+                const herramientas = await Herramienta.find();
+                return herramientas;
+            } catch (error) {
+                throw new Error(`Error al obtener las herramientas: ${error.message}`);
+            }
         },
         async getHerramienta (obj, { id }) {
             const herramienta = await Herramienta.findById(id);
