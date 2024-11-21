@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 // A quien se le presta
 const usuarioSchema = new mongoose.Schema({
     nombre: String,
-    run: String,
+    rut: String,
     correo: String,
     telefono: String
 });

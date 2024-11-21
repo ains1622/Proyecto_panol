@@ -286,6 +286,7 @@ const typeDefs = gql`
         getEquipos: [Equipo]
         getEquipo(id: ID!): Equipo
         getEquiposBySede(sede: String!): [Equipo]
+        getEquiposByComuna(comuna: String!): [Equipo]
         getEquiposByNombre(nombre: String!): [Equipo]
         getEquipoByCodigo(codigo: Int!): Equipo
 
@@ -293,6 +294,7 @@ const typeDefs = gql`
         getHerramientas: [Herramienta]
         getHerramienta(id: ID!): Herramienta
         getHerramientasBySede(sede: String!): [Herramienta]
+        getHerramientasByComuna(comuna: String!): [Herramienta]
         getHerramientasByNombre(nombre: String!): [Herramienta]
         getHerramientaByCodigo(codigo: Int!): Herramienta
 
@@ -300,6 +302,7 @@ const typeDefs = gql`
         getMateriales: [Material]
         getMaterial(id: ID!): Material
         getMaterialesBySede(sede: String!): [Material]
+        getMaterialesByComuna(comuna: String!): [Material]
         getMaterialesByNombre(nombre: String!): [Material]
         getMaterialByCodigo(codigo: Int!): Material
 
@@ -329,23 +332,23 @@ const typeDefs = gql`
 
         """ QUERIES DE PRESTAMOS """
         """ Queries de Prestamo Equipo """
-        getPrestamosEquipos: [PrestamoEquipoUnion]
-        getPrestamosByNombreEquipo(nombre: String!): [PrestamoEquipoUnion]
-        getPrestamosByCodigoEquipo(codigo: Int!): [PrestamoEquipoUnion]
+        getPrestamosEquipos: [PrestamosEquiposUnion]
+        getPrestamosByNombreEquipo(nombre: String!): [PrestamosEquiposUnion]
+        getPrestamosByCodigoEquipo(codigo: Int!): [PrestamosEquiposUnion]
         getPrestamosEquipoByEstudiante(estudiante: String!): [PrestamoEquipoE]
         getPrestamosEquipoByDocente(docente: String!): [PrestamoEquipoD]
 
         """ Queries de Prestamo Herramienta """
-        getPrestamosHerramientas: [PrestamoHerramientaUnion]
-        getPrestamosByNombreHerramienta(nombre: String!): [PrestamoHerramientaUnion]
-        getPrestamosByCodigoHerramienta(codigo: Int!): [PrestamoHerramientaUnion]
+        getPrestamosHerramientas: [PrestamosHerramientasUnion]
+        getPrestamosByNombreHerramienta(nombre: String!): [PrestamosHerramientasUnion]
+        getPrestamosByCodigoHerramienta(codigo: Int!): [PrestamosHerramientasUnion]
         getPrestamosHerramientaByEstudiante(estudiante: String!): [PrestamoHerramientaE]
         getPrestamosHerramientaByDocente(docente: String!): [PrestamoHerramientaD]
 
         """ Queries de Prestamo Material """
-        getPrestamosMateriales: [PrestamoMaterialUnion]
-        getPrestamosByNombreMaterial(nombre: String!): [PrestamoMaterialUnion]
-        getPrestamosByCodigoMaterial(codigo: Int!): [PrestamoMaterialUnion]
+        getPrestamosMateriales: [PrestamosMaterialesUnion]
+        getPrestamosByNombreMaterial(nombre: String!): [PrestamosMaterialesUnion]
+        getPrestamosByCodigoMaterial(codigo: Int!): [PrestamosMaterialesUnion]
         getPrestamosMaterialByEstudiante(estudiante: String!): [PrestamoMaterialE]
         getPrestamosMaterialByDocente(docente: String!): [PrestamoMaterialD]
 
@@ -363,6 +366,7 @@ const typeDefs = gql`
         getDocentesByEscuela(escuela: String!): [Docente]
         getDocentesByNombre(nombre: String!): [Docente]
         getDocentesByRamo(ramo: String!): [Docente]
+        getDocenteByRut(rut: String!): Docente
 
         """ Queries de usuarios"""
         getUsuarios: [UsuariosUnion]
