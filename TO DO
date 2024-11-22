@@ -11,7 +11,7 @@ Para el back end se necesita que:
     -API escalable
     -Definicion generica
     -Definicion generica de metodos
-    -Reglas individuales de parametros
+    -Reglas individuales de parametros **Resolvers con manejo de errores**
     -Reglas de negocio de parametros
     -Testing de servicios (sandbox)
 Para la integracion de back y front se necesita que:

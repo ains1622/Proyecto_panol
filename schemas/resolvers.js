@@ -99,382 +99,710 @@ const resolvers = {
             }
         },
         async getHerramienta (obj, { id }) {
+            try{
             const herramienta = await Herramienta.findById(id);
             return herramienta;
+            } catch (error) {
+                throw new Error(`Error: Herramienta no encontrada: ${error.message}`);
+            }
         },
         async getHerramientasBySede (obj, { sede }) {
+            try{
             const herramientas = await Herramienta.find({'sede.nombre': sede});
             return herramientas;
+            } catch (error) {
+                throw new Error(`Error: Sede: ${error.message}`);
+            }
         },
         async getHerramientasByComuna (obj, { comuna }) {
-            const herramientas = await Herramienta.find({'sede.comuna.nombre': comuna});
-            return herramientas;
+            try{
+                const herramientas = await Herramienta.find({'sede.comuna.nombre': comuna});
+                return herramientas;
+            } catch (error) {
+                throw new Error(`Error: Comuna: ${error.message}`);
+            }
         },
         async getHerramientasByNombre (obj, { nombre }) {
-            const herramientas = await Herramienta.find({nombre: nombre});
-            return herramientas;
+            try{
+                const herramientas = await Herramienta.find({nombre: nombre});
+                return herramientas;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getHerramientaByCodigo (obj, { codigo }) {
-            const herramienta = await Herramienta.findOne({codigo: codigo});
-            return herramienta;
+            try{
+                const herramienta = await Herramienta.findOne({codigo: codigo});
+                return herramienta;
+            } catch (error) {
+                throw new Error(`Error: Codigo: ${error.message}`);
+            }
         },
 
         // Querys de Materiales
         async getMateriales (obj) {
-            const materiales = await Material.find();
-            return materiales;
+            try{
+                const materiales = await Material.find();
+                return materiales;
+            } catch (error) {
+                throw new Error(`Error al obtener los materiales: ${error.message}`);
+            }
         },
         async getMaterial (obj, { id }) {
-            const material = await Material.findById(id);
-            return material;
+            try{
+                const material = await Material.findById(id);
+                return material;
+            } catch (error) {
+                throw new Error(`Error: Material no encontrado: ${error.message}`);
+            }
         },
         async getMaterialesBySede (obj, { sede }) {
-            const materiales = await Material.find({'sede.nombre': sede});
-            return materiales;
+            try{
+                const materiales = await Material.find({'sede.nombre': sede});
+                return materiales;
+            } catch (error) {
+                throw new Error(`Error: Sede: ${error.message}`);
+            }
         },
         async getMaterialesByComuna (obj, { comuna }) {
-            const materiales = await Material.find({'sede.comuna.nombre': comuna});
-            return materiales;
+            try{
+                const materiales = await Material.find({'sede.comuna.nombre': comuna});
+                return materiales;
+            } catch (error) {
+                throw new Error(`Error: Comuna: ${error.message}`);
+            }
         },
         async getMaterialesByNombre (obj, { nombre }) {
-            const materiales = await Material.find({nombre: nombre});
-            return materiales;
+            try{
+                const materiales = await Material.find({nombre: nombre});
+                return materiales;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getMaterialByCodigo (obj, { codigo }) {
-            const material = await Material.findOne({codigo: codigo});
-            return material;
+            try{
+                const material = await Material.findOne({codigo: codigo});
+                return material;
+            } catch (error) {
+                throw new Error(`Error: Codigo: ${error.message}`);
+            }
         },
 
         // Querys Geograficos
         async getSedes (obj) {
+            try{
             const sedes = await Sede.find();
             return sedes;
+            } catch (error) {
+                throw new Error(`Error: Sedes no encontradas: ${error.message}`);
+            }
         },
         async getSede (obj, { id }) {
-            const sede = await Sede.findById(id);
-            return sede;
+            try{
+                const sede = await Sede.findById(id);
+                return sede;
+            } catch (error) {
+                throw new Error(`Error: Sede no encontrada: ${error.message}`);
+            }
         },
         async getSedesByComuna (obj, { comuna }) {
-            const sedes = await Sede.find({'comuna.nombre': comuna});
-            return sedes;
+            try{
+                const sedes = await Sede.find({'comuna.nombre': comuna});
+                return sedes;
+            } catch (error) {
+                throw new Error(`Error: Comuna: ${error.message}`);
+            }
         },
         async getSedeByNombre (obj, { nombre }) {
-            const sede = await Sede.findOne({nombre: nombre});
-            return sede;
+            try{
+                const sede = await Sede.findOne({nombre: nombre});
+                return sede;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getComunas (obj) {
-            const comunas = await Comuna.find();
-            return comunas;
+            try{
+                const comunas = await Comuna.find();
+                return comunas;
+            } catch (error) {
+                throw new Error(`Error: Comunas no encontradas: ${error.message}`);
+            }
         },
         async getComuna (obj, { id }) {
+            try{
             const comuna = await Comuna.findById(id);
             return comuna;
+            } catch (error) {
+                throw new Error(`Error: Comuna no encontrada: ${error.message}`);
+            }
         },
         async getComunasByCiudad (obj, { ciudad }) {
-            const comunas = await Comuna.find({'ciudad.nombre': ciudad});
-            return comunas;
+            try{
+                const comunas = await Comuna.find({'ciudad.nombre': ciudad});
+                return comunas;
+            } catch (error) {
+                throw new Error(`Error: Ciudad: ${error.message}`);
+            }
         },
         async getComunaByNombre (obj, { nombre }) {
-            const comuna = await Comuna.findOne({nombre: nombre});
-            return comuna;
+            try{
+                const comuna = await Comuna.findOne({nombre: nombre});
+                return comuna;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getCiudades (obj) {
-            const ciudades = await Ciudad.find();
-            return ciudades;
+            try{
+                const ciudades = await Ciudad.find();
+                return ciudades;
+            } catch (error) {
+                throw new Error(`Error: Ciudades no encontradas: ${error.message}`);
+            }
         },
         async getCiudad (obj, { id }) {
-            const ciudad = await Ciudad.findById(id);
-            return ciudad;
+            try{
+                const ciudad = await Ciudad.findById(id);
+                return ciudad;
+            } catch (error) {
+                throw new Error(`Error: Ciudad no encontrada: ${error.message}`);
+            }
         },
         async getCiudadesByRegion (obj, { region }) {
-            const ciudades = await Ciudad.find({'region.nombre': region});
-            return ciudades;
+            try{
+                const ciudades = await Ciudad.find({'region.nombre': region});
+                return ciudades;
+            } catch (error) {
+                throw new Error(`Error: Region: ${error.message}`);
+            }
         },
         async getCiudadByNombre (obj, { nombre }) {
-            const ciudad = await Ciudad.findOne({nombre: nombre});
-            return ciudad;
+            try{
+                const ciudad = await Ciudad.findOne({nombre: nombre});
+                return ciudad;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getRegiones (obj) {
-            const regiones = await Region.find();
-            return regiones;
+            try{
+                const regiones = await Region.find();
+                return regiones;
+            } catch (error) {
+                throw new Error(`Error: Regiones no encontradas: ${error.message}`);
+            }
         },
         async getRegion (obj, { id }) {
-            const region = await Region.findById(id);
-            return region;
+            try{
+                const region = await Region.findById(id);
+                return region;
+            } catch (error) {
+                throw new Error(`Error: Region no encontrada: ${error.message}`);
+            }
         },
         async getRegionByNombre (obj, { nombre }) {
-            const region = await Region.findOne({nombre: nombre});
-            return region;
+            try{
+                const region = await Region.findOne({nombre: nombre});
+                return region;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
 
         // Querys de Prestamos
         async getPrestamosEquipos (obj) {
-            const prestamosEstudiantes = await PrestamoEquipoE.find();
-            const prestamosDocentes = await PrestamoEquipoD.find();
+            try{
+                const prestamosEstudiantes = await PrestamoEquipoE.find();
+                const prestamosDocentes = await PrestamoEquipoD.find();
 
-            const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
-            return prestamos;
+                const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Prestamos no encontrados: ${error.message}`);
+            }
         },
         async getPrestamosByNombreEquipo (obj, { nombre }) {
-            const prestamosEstudiantes = await PrestamoEquipoE.find({'equipo.nombre': nombre});
-            const prestamosDocentes = await PrestamoEquipoD.find({'equipo.nombre': nombre});
+            try{
+                const prestamosEstudiantes = await PrestamoEquipoE.find({'equipo.nombre': nombre});
+                const prestamosDocentes = await PrestamoEquipoD.find({'equipo.nombre': nombre});
 
-            const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
-            return prestamos;
+                const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getPrestamosByCodigoEquipo (obj, { codigo }) {
-            const prestamosEstudiantes = await PrestamoEquipoE.find({'equipo.codigo': codigo});
-            const prestamosDocentes = await PrestamoEquipoD.find({'equipo.codigo': codigo});
+            try{
+                const prestamosEstudiantes = await PrestamoEquipoE.find({'equipo.codigo': codigo});
+                const prestamosDocentes = await PrestamoEquipoD.find({'equipo.codigo': codigo});
 
-            const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
-            return prestamos;
+                const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Codigo: ${error.message}`);
+            }
         },
         async getPrestamosEquipoByEstudiante (obj, { nombre }) {
-            const prestamos = await PrestamoEquipoE.find({'estudiante.usuario.nombre': nombre});
-            return prestamos;
+            try{
+                const prestamos = await PrestamoEquipoE.find({'estudiante.usuario.nombre': nombre});
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Estudiante: ${error.message}`);
+            }
         },
         async getPrestamosEquipoByDocente (obj, { nombre }) {
-            const prestamos = await PrestamoEquipoD.find({'docente.usuario.nombre': nombre});
-            return prestamos;
+            try{
+                const prestamos = await PrestamoEquipoD.find({'docente.usuario.nombre': nombre});
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Docente: ${error.message}`);
+            }
         },
         async getPrestamosHerramientas (obj) {
-            const prestamosEstudiantes = await PrestamoHerramientaE.find();
-            const prestamosDocentes = await PrestamoHerramientaD.find();
+            try{
+                const prestamosEstudiantes = await PrestamoHerramientaE.find();
+                const prestamosDocentes = await PrestamoHerramientaD.find();
 
-            const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
-            return prestamos;
+                const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Prestamos no encontrados: ${error.message}`);
+            }
         },
         async getPrestamosByNombreHerramienta (obj, { nombre }) {
-            const prestamosEstudiantes = await PrestamoHerramientaE.find({'herramienta.nombre': nombre});
-            const prestamosDocentes = await PrestamoHerramientaD.find({'herramienta.nombre': nombre});
+            try{
+                const prestamosEstudiantes = await PrestamoHerramientaE.find({'herramienta.nombre': nombre});
+                const prestamosDocentes = await PrestamoHerramientaD.find({'herramienta.nombre': nombre});
 
-            const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
-            return prestamos;
+                const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getPrestamosByCodigoHerramienta (obj, { codigo }) {
-            const prestamosEstudiantes = await PrestamoHerramientaE.find({'herramienta.codigo': codigo});
-            const prestamosDocentes = await PrestamoHerramientaD.find({'herramienta.codigo': codigo});
+            try{
+                const prestamosEstudiantes = await PrestamoHerramientaE.find({'herramienta.codigo': codigo});
+                const prestamosDocentes = await PrestamoHerramientaD.find({'herramienta.codigo': codigo});
 
-            const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
-            return prestamos;
+                const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Codigo: ${error.message}`);
+            }
         },
         async getPrestamosHerramientasByEstudiante (obj, { nombre }) {
-            const prestamos = await PrestamoHerramientaE.find({'estudiante.usuario.nombre': nombre});
-            return prestamos;
+            try{
+                const prestamos = await PrestamoHerramientaE.find({'estudiante.usuario.nombre': nombre});
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Estudiante: ${error.message}`);
+            }
         },
         async getPrestamosHerramientasByDocente (obj, { nombre }) {
-            const prestamos = await PrestamoHerramientaD.find({'docente.usuario.nombre': nombre});
-            return prestamos;
+            try{
+                const prestamos = await PrestamoHerramientaD.find({'docente.usuario.nombre': nombre});
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Docente: ${error.message}`);
+            }
         },
         async getPrestamosMateriales (obj) {
-            const prestamosEstudiantes = await PrestamoMaterialE.find();
-            const prestamosDocentes = await PrestamoMaterialD.find();
+            try{
+                const prestamosEstudiantes = await PrestamoMaterialE.find();
+                const prestamosDocentes = await PrestamoMaterialD.find();
 
-            const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
-            return prestamos;
+                const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Prestamos no encontrados: ${error.message}`);
+            }
         },
         async getPrestamosByNombreMaterial (obj, { nombre }) {
-            const prestamosEstudiantes = await PrestamoMaterialE.find({'material.nombre': nombre});
-            const prestamosDocentes = await PrestamoMaterialD.find({'material.nombre': nombre});
+            try{
+                const prestamosEstudiantes = await PrestamoMaterialE.find({'material.nombre': nombre});
+                const prestamosDocentes = await PrestamoMaterialD.find({'material.nombre': nombre});
 
-            const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
-            return prestamos;
+                const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getPrestamosByCodigoMaterial (obj, { codigo }) {
-            const prestamosEstudiantes = await PrestamoMaterialE.find({'material.codigo': codigo});
-            const prestamosDocentes = await PrestamoMaterialD.find({'material.codigo': codigo});
+            try{
+                const prestamosEstudiantes = await PrestamoMaterialE.find({'material.codigo': codigo});
+                const prestamosDocentes = await PrestamoMaterialD.find({'material.codigo': codigo});
 
-            const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
-            return prestamos;
+                const prestamos = [...prestamosEstudiantes, ...prestamosDocentes];
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Codigo: ${error.message}`);
+            }
         },
         async getPrestamosMaterialesByEstudiante (obj, { nombre }) {
-            const prestamos = await PrestamoMaterialE.find({'estudiante.usuario.nombre': nombre});
-            return prestamos;
+            try{
+                const prestamos = await PrestamoMaterialE.find({'estudiante.usuario.nombre': nombre});
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Estudiante: ${error.message}`);
+            }
         },
         async getPrestamosMaterialesByDocente (obj, { nombre }) {
-            const prestamos = await PrestamoMaterialD.find({'docente.usuario.nombre': nombre});
-            return prestamos;
+            try{
+                const prestamos = await PrestamoMaterialD.find({'docente.usuario.nombre': nombre});
+                return prestamos;
+            } catch (error) {
+                throw new Error(`Error: Docente: ${error.message}`);
+            }
         },
 
         // Querys de Usuarios
         async getEstudiantes (obj) {
-            const estudiantes = await Estudiante.find();
-            return estudiantes;
+            try{
+                const estudiantes = await Estudiante.find();
+                return estudiantes;
+            } catch (error) {
+                throw new Error(`Error: Estudiantes no encontrados: ${error.message}`);
+            }
         },
         async getEstudiante (obj, { id }) {
-            const estudiante = await Estudiante.findById(id);
-            return estudiante;
+            try{
+                const estudiante = await Estudiante.findById(id);
+                return estudiante;
+            } catch (error) {
+                throw new Error(`Error: Estudiante no encontrado: ${error.message}`);
+            }
         },
         async getEstudiantesByCarrera (obj, { carrera }) {
-            const estudiantes = await Estudiante.find({'carrera.nombre': carrera});
-            return estudiantes;
+            try{
+                const estudiantes = await Estudiante.find({'carrera.nombre': carrera});
+                return estudiantes;
+            } catch (error) {  
+                throw new Error(`Error: Carrera: ${error.message}`);
+            }
         },
         async getEstudiantesByNombre (obj, { nombre }) {
-            const estudiantes = await Estudiante.find({nombre: nombre});
-            return estudiantes;
+            try{
+                const estudiantes = await Estudiante.find({nombre: nombre});
+                return estudiantes;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getEstudianteByRut (obj, { rut }) {
-            const estudiante = await Estudiante.findOne({'usuario.rut': rut});
-            return estudiante;
+            try{
+                const estudiante = await Estudiante.findOne({'usuario.rut': rut});
+                return estudiante;
+            } catch (error) {
+                throw new Error(`Error: Rut: ${error.message}`);
+            }
         },
         async getDocentes (obj) {
-            const docentes = await Docente.find();
-            return docentes;
+            try{
+                const docentes = await Docente.find();
+                return docentes;
+            } catch (error) {
+                throw new Error(`Error: Docentes no encontrados: ${error.message}`);
+            }
         },
         async getDocente (obj, { id }) {
-            const docente = await Docente.findById(id);
-            return docente;
+            try{
+                const docente = await Docente.findById(id);
+                return docente;
+            } catch (error) {
+                throw new Error(`Error: Docente no encontrado: ${error.message}`);
+            }
         },
         async getDocentesByEscuela (obj, { escuela }) {
-            const docentes = await Docente.find({'escuela.nombre': escuela});
-            return docentes;
+            try{
+                const docentes = await Docente.find({'escuela.nombre': escuela});
+                return docentes;
+            } catch (error) {
+                throw new Error(`Error: Escuela: ${error.message}`);
+            }
         },
         async getDocentesByNombre (obj, { nombre }) {
-            const docentes = await Docente.find({nombre: nombre});
-            return docentes;
+            try{
+                const docentes = await Docente.find({nombre: nombre});
+                return docentes;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getDocentesByRamo (obj, { ramo }) {
-            const docentes = await Docente.find({'ramo.nombre': ramo});
-            return docentes;
+            try{
+                const docentes = await Docente.find({'ramo.nombre': ramo});
+                return docentes;
+            } catch (error) {
+                throw new Error(`Error: Ramo: ${error.message}`);
+            }
         },
         async getDocenteByRut (obj, { rut }) {
-            const docente = await Docente.findOne({'usuario.rut': rut});
-            return docente;
+            try{
+                const docente = await Docente.findOne({'usuario.rut': rut});
+                return docente;
+            } catch (error) {
+                throw new Error(`Error: Rut: ${error.message}`);
+            }
         },
         async getUsuarios (obj) {
-            const usuarios = await Usuario.find();
-            return usuarios;
+            try{
+                const usuarios = await Usuario.find();
+                return usuarios;
+            } catch (error) {
+                throw new Error(`Error: Usuarios no encontrados: ${error.message}`);
+            }
         },
         async getUsuario (obj, { id }) {
-            const usuario = await Usuario.findById(id);
-            return usuario;
+            try{
+                const usuario = await Usuario.findById(id);
+                return usuario;
+            } catch (error) {
+                throw new Error(`Error: Usuario no encontrado: ${error.message}`);
+            }
         },
         async getUsuariosByNombre (obj, { nombre }) {
-            const usuarios = await Usuario.find({nombre: nombre});
-            return usuarios;
+            try{
+                const usuarios = await Usuario.find({nombre: nombre});
+                return usuarios;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getUsuariosBySede (obj, { sede }) {
-            const usuarios = await Usuario.find({'sede.nombre': sede});
-            return usuarios;
+            try{
+                const usuarios = await Usuario.find({'sede.nombre': sede});
+                return usuarios;
+            } catch (error) {
+                throw new Error(`Error: Sede: ${error.message}`);
+            }
         },
 
         // Querys de Carreras
         async getCarreras (obj) {
-            const carreras = await Carrera.find();
-            return carreras;
+            try{
+                const carreras = await Carrera.find();
+                return carreras;
+            } catch (error) {
+                throw new Error(`Error: Carreras no encontradas: ${error.message}`);
+            }
         },
         async getCarrera (obj, { id }) {
-            const carrera = await Carrera.findById(id);
-            return carrera;
+            try{
+                const carrera = await Carrera.findById(id);
+                return carrera;
+            } catch (error) {
+                throw new Error(`Error: Carrera no encontrada: ${error.message}`);
+            }
         },
         async getCarrerasByEscuela (obj, { escuela }) {
-            const carreras = await Carrera.find({escuela: escuela});
-            return carreras;
+            try{
+                const carreras = await Carrera.find({escuela: escuela});
+                return carreras;
+            } catch (error) {
+                throw new Error(`Error: Escuela: ${error.message}`);
+            }
         },
         async getCarrerasByNombre (obj, { nombre }) {
-            const carreras = await Carrera.find({nombre: nombre});
-            return carreras;
+            try{
+                const carreras = await Carrera.find({nombre: nombre});
+                return carreras;
+            } catch (error) {
+                throw new Error(`Error: Nombre: ${error.message}`);
+            }
         },
         async getCarrerasBySede (obj, { sede }) {
-            const carreras = await Carrera.find({'sede.nombre': sede});
-            return carreras;
+            try{
+                const carreras = await Carrera.find({'sede.nombre': sede});
+                return carreras;
+            } catch (error) {
+                throw new Error(`Error: Sede: ${error.message}`);
+            }
         }
     },
     Mutation: {
 
         // Mutations de objetos
         async addEquipo(obj, { input }) {
-            const equipo = new Equipo(input);
-            await equipo.save();
-            return equipo;
+            try{
+                const equipo = new Equipo(input);
+                await equipo.save();
+                return equipo;
+            } catch (error) {
+                throw new Error(`Error al agregar el equipo: ${error.message}`);
+            }
         },
         async updateEquipo(obj, { id, input }) {
-            const equipo = await Equipo.findByIdAndUpdate(id, input, { new: true });
-            return equipo;
+            try{
+                const equipo = await Equipo.findByIdAndUpdate(id, input, { new: true });
+                return equipo;
+            } catch (error) {
+                throw new Error(`Error al actualizar el equipo: ${error.message}`);
+            }
         },
         async deleteEquipo(obj, { id }) {
-            await Equipo.findByIdAndDelete(id);
-            return { message: 'Equipo eliminado' };
+            try{
+                await Equipo.findByIdAndDelete(id);
+                return { message: 'Equipo eliminado' };
+            } catch (error) {
+                throw new Error(`Error al eliminar el equipo: ${error.message}`);
+            }
         },
         async addHerramienta(obj, { input }) {
-            const herramienta = new Herramienta(input);
-            await herramienta.save();
-            return herramienta;
+            try{
+                const herramienta = new Herramienta(input);
+                await herramienta.save();
+                return herramienta;
+            } catch (error) {
+                throw new Error(`Error al agregar la herramienta: ${error.message}`);
+            }
         },
         async updateHerramienta(obj, { id, input }) {
-            const herramienta = await Herramienta.findByIdAndUpdate(id, input, { new: true });
-            return herramienta;
+            try{
+                const herramienta = await Herramienta.findByIdAndUpdate(id, input, { new: true });
+                return herramienta;
+            } catch (error) {
+                throw new Error(`Error al actualizar la herramienta: ${error.message}`);
+            }
         },
         async deleteHerramienta(obj, { id }) {
-            await Herramienta.findByIdAndDelete(id);
-            return { message: 'Herramienta eliminada' };
+            try{
+                await Herramienta.findByIdAndDelete(id);
+                return { message: 'Herramienta eliminada' };
+            } catch (error) {
+                throw new Error(`Error al eliminar la herramienta: ${error.message}`);
+            }
         },
         async addMaterial(obj, { input }) {
-            const material = new Material(input);
-            await material.save();
-            return material;
+            try{
+                const material = new Material(input);
+                await material.save();
+                return material;
+            } catch (error) {
+                throw new Error(`Error al agregar el material: ${error.message}`);
+            }
         },
         async updateMaterial(obj, { id, input }) {
-            const material = await Material.findByIdAndUpdate(id, input, { new: true });
-            return material;
+            try{
+                const material = await Material.findByIdAndUpdate(id, input, { new: true });
+                return material;
+            } catch (error) {
+                throw new Error(`Error al actualizar el material: ${error.message}`);
+            }
         },
         async deleteMaterial(obj, { id }) {
-            await Material.findByIdAndDelete(id);
-            return { message: 'Material eliminado' };
+            try{
+                await Material.findByIdAndDelete(id);
+                return { message: 'Material eliminado' };
+            } catch (error) {
+                throw new Error(`Error al eliminar el material: ${error.message}`);
+            }
         },
 
         // Mutations geograficos
         async addSede(obj, { input }) {
+            try{
             const sede = new Sede(input);
             await sede.save();
             return sede;
+            } catch (error) {
+                throw new Error(`Error al agregar la sede: ${error.message}`);
+            }
         },
         async updateSede(obj, { id, input }) {
+            try{
             const sede = await Sede.findByIdAndUpdate(id, input, { new: true });
             return sede;
+            } catch (error) {
+                throw new Error(`Error al actualizar la sede: ${error.message}`);
+            }
         },
         async deleteSede(obj, { id }) {
+            try{
             await Sede.findByIdAndDelete(id);
             return { message: 'Sede eliminada' };
+            } catch (error) {
+                throw new Error(`Error al eliminar la sede: ${error.message}`);
+            }
         },
         async addComuna(obj, { input }) {
+            try{
             const comuna = new Comuna(input);
             await comuna.save();
             return comuna;
+            } catch (error) {
+                throw new Error(`Error al agregar la comuna: ${error.message}`);
+            }
         },
         async updateComuna(obj, { id, input }) {
+            try{
             const comuna = await Comuna.findByIdAndUpdate(id, input, { new: true });
             return comuna;
+            } catch (error) {
+                throw new Error(`Error al actualizar la comuna: ${error.message}`);
+            }
         },
         async deleteComuna(obj, { id }) {
+            try{
             await Comuna.findByIdAndDelete(id);
             return { message: 'Comuna eliminada' };
+            } catch (error) {
+                throw new Error(`Error al eliminar la comuna: ${error.message}`);
+            }
         },
         async addCiudad(obj, { input }) {
+            try{
             const ciudad = new Ciudad(input);
             await ciudad.save();
             return ciudad;
+            } catch (error) {
+                throw new Error(`Error al agregar la ciudad: ${error.message}`);
+            }
         },
         async updateCiudad(obj, { id, input }){
+            try{
             const ciudad = await Ciudad.findByIdAndUpdate(id, input, { new: true });
             return ciudad;
+            } catch (error) {
+                throw new Error(`Error al actualizar la ciudad: ${error.message}`);
+            }
         },
         async deleteCiudad(obj, { id }) {
+            try{
             await Ciudad.findByIdAndDelete(id);
             return { message: 'Ciudad eliminada' };
+            } catch (error) {
+                throw new Error(`Error al eliminar la ciudad: ${error.message}`);
+            }
         },
         async addRegion(obj, { input }) {
+            try{
             const region = new Region(input);
             await region.save();
             return region;
+            } catch (error) {
+                throw new Error(`Error al agregar la region: ${error.message}`);
+            }
         },
         async updateRegion(obj, { id, input }) {
+            try{
             const region = await Region.findByIdAndUpdate(id, input, { new: true });
             return region;
+            } catch (error) {
+                throw new Error(`Error al actualizar la region: ${error.message}`);
+            }
         },
         async deleteRegion(obj, { id }) {
+            try{
             await Region.findByIdAndDelete(id);
             return { message: 'Region eliminada' };
+            } catch (error) {
+                throw new Error(`Error al eliminar la region: ${error.message}`);
+            }
         },
 
         // Mutations de Prestamos
@@ -579,8 +907,12 @@ const resolvers = {
             }
         },
         async deletePrestamoEquipoE(obj, { id }) {
+            try{
             await PrestamoEquipoE.findByIdAndDelete(id);
             return { message: 'Prestamo eliminado' };
+            } catch (error) {
+                throw new Error(`Error al eliminar el prestamo: ${error.message}`);
+            }
         },
         async addPrestamoEquipoD(parent, { input }, context, info) {
             const { docente, prestamo, sede, equipo } = input;
@@ -683,8 +1015,12 @@ const resolvers = {
             }
         },
         async deletePrestamoEquipoD(obj, { id }) {
+            try{
             await PrestamoEquipoD.findByIdAndDelete(id);
             return { message: 'Prestamo eliminado' };
+            } catch (error) {
+                throw new Error(`Error al eliminar el prestamo: ${error.message}`);
+            }
         },
         async addPrestamoHerramientaE(parent, { input }, context, info) {
             const { estudiante, prestamo, sede, equipo } = input;
@@ -731,98 +1067,178 @@ const resolvers = {
               }
         },
         async updatePrestamoHerramientaE(obj, { id, input }) {
+            try{
             const prestamo = await PrestamoHerramientaE.findByIdAndUpdate(id, input, { new: true });
             return prestamo;
+            } catch (error) {
+                throw new Error(`Error al actualizar el prestamo: ${error.message}`);
+            }
         },
         async deletePrestamoHerramientaE(obj, { id }) {
+            try{
             await PrestamoHerramientaE.findByIdAndDelete(id);
             return { message: 'Prestamo eliminado' };
+            } catch (error) {
+                throw new Error(`Error al eliminar el prestamo: ${error.message}`);
+            }
         },
         async addPrestamoHerramientaD(obj, { input }) {
+            try{
             const prestamo = new PrestamoHerramientaD(input);
             await prestamo.save();
             return prestamo;
+            } catch (error) {
+                throw new Error(`Error al agregar el prestamo: ${error.message}`);
+            }
         },
         async updatePrestamoHerramientaD(obj, { id, input }) {
+            try{
             const prestamo = await PrestamoHerramientaD.findByIdAndUpdate(id, input, { new: true });
             return prestamo;
+            } catch (error) {
+                throw new Error(`Error al actualizar el prestamo: ${error.message}`);
+            }
         },
         async deletePrestamoHerramientaD(obj, { id }) {
+            try{
             await PrestamoHerramientaD.findByIdAndDelete(id);
             return { message: 'Prestamo eliminado' };
+            } catch (error) {
+                throw new Error(`Error al eliminar el prestamo: ${error.message}`);
+            }
         },
         async addPrestamoMaterialE(obj, { input }) {
+            try{
             const prestamo = new PrestamoMaterialE(input);
             await prestamo.save();
             return prestamo;
+            } catch (error) {
+                throw new Error(`Error al agregar el prestamo: ${error.message}`);
+            }
         },
         async updatePrestamoMaterialE(obj, { id, input }) {
+            try{
             const prestamo = await PrestamoMaterialE.findByIdAndUpdate(id, input, { new: true });
             return prestamo;
+            } catch (error) {
+                throw new Error(`Error al actualizar el prestamo: ${error.message}`);
+            }
         },
         async deletePrestamoMaterialE(obj, { id }) {
+            try{
             await PrestamoMaterialE.findByIdAndDelete(id);
             return { message: 'Prestamo eliminado' };
+            } catch (error) {
+                throw new Error(`Error al eliminar el prestamo: ${error.message}`);
+            }
         },
         async addPrestamoMaterialD(obj, { input }) {
+            try{
             const prestamo = new PrestamoMaterialD(input);
             await prestamo.save();
             return prestamo;
+            } catch (error) {
+                throw new Error(`Error al agregar el prestamo: ${error.message}`);
+            }
         },
         async updatePrestamoMaterialD(obj, { id, input }) {
+            try{
             const prestamo = await PrestamoMaterialD.findByIdAndUpdate(id, input, { new: true });
             return prestamo;
+            } catch (error) {
+                throw new Error(`Error al actualizar el prestamo: ${error.message}`);
+            }
         },
         async deletePrestamoMaterialD(obj, { id }) {
+            try{
             await PrestamoMaterialD.findByIdAndDelete(id);
             return { message: 'Prestamo eliminado' };
+            } catch (error) {
+                throw new Error(`Error al eliminar el prestamo: ${error.message}`);
+            }
         },
 
         // Mutations de Usuarios
         async addEstudiante(parent, { input }) {
+            try{
             const usuario = new Usuario(input.usuario);
             await usuario.save();
             const estudiante = new Estudiante({ ...input, usuario: usuario._id });
             await estudiante.save();
             return estudiante;
+            } catch (error) {
+                throw new Error(`Error al agregar el estudiante: ${error.message}`);
+            }
         },
         async updateEstudiante(parent, { id, input }) {
+            try{
             const estudiante = await Estudiante.findByIdAndUpdate(id, input, { new: true });
             return estudiante;
+            } catch (error) {
+                throw new Error(`Error al actualizar el estudiante: ${error.message}`);
+            }
         },
         async deleteEstudiante(parent, { id }) {
+            try{
             await Estudiante.findByIdAndDelete(id);
             return { message: 'Estudiante eliminado' };
+            } catch (error) {
+                throw new Error(`Error al eliminar el estudiante: ${error.message}`);
+            }
         },
         async addDocente(parent, { input }) {
+            try{
             const usuario = new Usuario(input.usuario);
             await usuario.save();
             const docente = new Docente({ ...input, usuario: usuario._id });
             await docente.save();
             return docente;
+            } catch (error) {
+                throw new Error(`Error al agregar el docente: ${error.message}`);
+            }
         },
         async updateDocente(parent, { id, input }) {
+            try{
             const docente = await Docente.findByIdAndUpdate(id, input, { new: true });
             return docente;
+            } catch (error) {
+                throw new Error(`Error al actualizar el docente: ${error.message}`);
+            }
         },
         async deleteDocente(parent, { id }) {
+            try{
             await Docente.findByIdAndDelete(id);
             return { message: 'Docente eliminado' };
+            } catch (error) {
+                throw new Error(`Error al eliminar el docente: ${error.message}`);
+            }
         },
         
         // Mutations de Carreras
         async addCarrera(obj, { input }) {
+            try{
             const carrera = new Carrera(input);
             await carrera.save();
             return carrera;
+            } catch (error) {
+                throw new Error(`Error al agregar la carrera: ${error.message}`);
+            }
         },
         async updateCarrera(obj, { id, input }) {
+            try{
             const carrera = await Carrera.findByIdAndUpdate(id, input, { new: true });
             return carrera;
+            } catch (error) {
+                throw new Error(`Error al actualizar la carrera: ${error.message}`);
+            }
         },
         async deleteCarrera(obj, { id }) {
+            try{
             await Carrera.findByIdAndDelete(id);
             return { message: 'Carrera eliminada' };
+            } catch (error) {
+                throw new Error(`Error al eliminar la carrera: ${error.message}`);
+            }
         }
     }
 };
