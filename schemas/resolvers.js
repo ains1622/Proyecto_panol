@@ -1,194 +1,91 @@
 const { get } = require('lodash');
-const {Equipo, Estudiante, Usuario, Docente, Carrera, Sede, Herramienta, Material, Ciudad, Comuna, Region, Prestamo, PrestamoEquipoE, PrestamoEquipoD,
-    PrestamoHerramientaE, PrestamoHerramientaD, PrestamoMaterialE, PrestamoMaterialD} = require('../models/modelSchemas');
+const {Equipo, Estudiante, Usuario, Docente, Carrera, Sede,Ciudad, Comuna, Region, Prestamo} = require('../models/modelSchemas');
 const { getEnterLeaveForKind } = require('graphql');
 
 const resolvers = {
-    // Para manejar las uniones
-    PrestamosEquiposUnion: {
-        __resolveType(obj){
-            if (obj.estudiante && obj.estudiante.carrera){
-                return 'PrestamoEquipoE';
-            }
-            if (obj.docente && obj.docente.ramo) {
-                return 'PrestamoEquipoD';
-            }
-            return null;
-        }
-    },
-    PrestamosHerramientasUnion: {
-        __resolveType(obj){
-            if (obj.estudiante && obj.estudiante.carrera){
-                return 'PrestamoHerramientE';
-            }
-            if (obj.docente && obj.docente.ramo) {
-                return 'PrestamoHerramientD';
-            }
-            return null;
-        }
-    },
-    PrestamosMaterialesUnion: {
-        __resolveType(obj){
-            if (obj.estudiante && obj.estudiante.carrera){
-                return 'PrestamoMaterialE';
-            }
-            if (obj.docente && obj.docente.ramo) {
-                return 'PrestamoMaterialD';
-            }
-            return null;
-        }
-    },
-
     Query: {
-        // Querys de Equipos
-        async getEquipos(parent) {
-            try {
-              const equipos = await Equipo.find();
-              return equipos;
+        // Querys de Items
+        async getItems (obj) {
+            try{
+                const items = await Item.find();
+                return items;
             } catch (error) {
-              throw new Error(`Error al obtener los equipos: ${error.message}`);
+                throw new Error(`Error: Items no encontrados: ${error.message}`);
             }
         },
-        async getEquipo (obj, { id } ) {
+        async getItem (obj, { id }) {
             try{
-            const equipo = await Equipo.findById(id);
-            return equipo;
+                const item = await Item.findById(id);
+                return item;
             } catch (error) {
-                throw new Error(`Error: Equipo no encontrado: ${error.message}`);
+                throw new Error(`Error: Item no encontrado: ${error.message}`);
             }
         },
-        async getEquiposBySede (obj, { sede } ) {
+        async getItemsByNombre (obj, { nombre }) {
             try{
-                const equipos = await Equipo.find({'sede.nombre': sede});
-                return equipos;
-            } catch (error) {
-                throw new Error(`Error: Sede: ${error.message}`);
-            }
-        },
-        async getEquiposByComuna (obj, { comuna } ) {
-            try{
-                const equipos = await Equipo.find({'sede.comuna.nombre': comuna});
-                return equipos;
-            } catch (error) {   
-                throw new Error(`Error: Comuna: ${error.message}`);
-            }
-        },
-        async getEquiposByNombre (obj, { nombre } ) {
-            try{
-                const equipos = await Equipo.find({nombre: nombre});
-                return equipos;
+                const items = await Item.find({nombre: nombre});
+                return items;
             } catch (error) {
                 throw new Error(`Error: Nombre: ${error.message}`);
             }
         },
-        async getEquipoByCodigo (obj, { codigo } ) {
+        async getItemsByCodigo (obj, { codigo }) {
             try{
-                const equipo = await Equipo.findOne({codigo: codigo});
-                return equipo;
+                const items = await Item.find({codigo: codigo});
+                return items;
             } catch (error) {
                 throw new Error(`Error: Codigo: ${error.message}`);
             }
         },
-        // Querys de Estudiantes
-        async getHerramientas (obj) {
-            try {
-                const herramientas = await Herramienta.find();
-                return herramientas;
+        async getItemsByTipo (obj, { tipo }) {
+            try{
+                const items = await Item.find({tipo: tipo});
+                return items;
             } catch (error) {
-                throw new Error(`Error al obtener las herramientas: ${error.message}`);
+                throw new Error(`Error: Tipo: ${error.message}`);
             }
         },
-        async getHerramienta (obj, { id }) {
+        async getItemsBySede (obj, { sede }) {
             try{
-            const herramienta = await Herramienta.findById(id);
-            return herramienta;
-            } catch (error) {
-                throw new Error(`Error: Herramienta no encontrada: ${error.message}`);
-            }
-        },
-        async getHerramientasBySede (obj, { sede }) {
-            try{
-            const herramientas = await Herramienta.find({'sede.nombre': sede});
-            return herramientas;
+                const items = await Item.find({'sede.nombre': sede});
+                return items;
             } catch (error) {
                 throw new Error(`Error: Sede: ${error.message}`);
             }
         },
-        async getHerramientasByComuna (obj, { comuna }) {
+        async getItems
+        async getItemsByTipoYSede (obj, { tipo, sede }) {
             try{
-                const herramientas = await Herramienta.find({'sede.comuna.nombre': comuna});
-                return herramientas;
+                const items = await Item.find({$and: [{tipo: tipo}, {'sede.nombre': sede}]});
+                return items;
             } catch (error) {
-                throw new Error(`Error: Comuna: ${error.message}`);
+                throw new Error(`Error: Tipo y Sede: ${error.message}`);
             }
         },
-        async getHerramientasByNombre (obj, { nombre }) {
+        async getItemsByTipoYComuna (obj, { tipo, comuna }) {
             try{
-                const herramientas = await Herramienta.find({nombre: nombre});
-                return herramientas;
+                const items = await Item.find({$and: [{tipo: tipo}, {'sede.comuna.nombre': comuna}]});
+                return items;
             } catch (error) {
-                throw new Error(`Error: Nombre: ${error.message}`);
+                throw new Error(`Error: Tipo y Comuna: ${error.message}`);
             }
         },
-        async getHerramientaByCodigo (obj, { codigo }) {
+        async getItemsByTipoYCiudad (obj, { tipo, ciudad }) {
             try{
-                const herramienta = await Herramienta.findOne({codigo: codigo});
-                return herramienta;
+                const items = await Item.find({$and: [{tipo: tipo}, {'sede.ciudad.nombre': ciudad}]});
+                return items;
             } catch (error) {
-                throw new Error(`Error: Codigo: ${error.message}`);
+                throw new Error(`Error: Tipo y Ciudad: ${error.message}`);
             }
         },
-
-        // Querys de Materiales
-        async getMateriales (obj) {
+        async getItemsByTipoYRegion (obj, { tipo, region }) {
             try{
-                const materiales = await Material.find();
-                return materiales;
+                const items = await Item.find({$and: [{tipo: tipo}, {'sede.region.nombre': region}]});
+                return items;
             } catch (error) {
-                throw new Error(`Error al obtener los materiales: ${error.message}`);
+                throw new Error(`Error: Tipo y Region: ${error.message}`);
             }
         },
-        async getMaterial (obj, { id }) {
-            try{
-                const material = await Material.findById(id);
-                return material;
-            } catch (error) {
-                throw new Error(`Error: Material no encontrado: ${error.message}`);
-            }
-        },
-        async getMaterialesBySede (obj, { sede }) {
-            try{
-                const materiales = await Material.find({'sede.nombre': sede});
-                return materiales;
-            } catch (error) {
-                throw new Error(`Error: Sede: ${error.message}`);
-            }
-        },
-        async getMaterialesByComuna (obj, { comuna }) {
-            try{
-                const materiales = await Material.find({'sede.comuna.nombre': comuna});
-                return materiales;
-            } catch (error) {
-                throw new Error(`Error: Comuna: ${error.message}`);
-            }
-        },
-        async getMaterialesByNombre (obj, { nombre }) {
-            try{
-                const materiales = await Material.find({nombre: nombre});
-                return materiales;
-            } catch (error) {
-                throw new Error(`Error: Nombre: ${error.message}`);
-            }
-        },
-        async getMaterialByCodigo (obj, { codigo }) {
-            try{
-                const material = await Material.findOne({codigo: codigo});
-                return material;
-            } catch (error) {
-                throw new Error(`Error: Codigo: ${error.message}`);
-            }
-        },
-
         // Querys Geograficos
         async getSedes (obj) {
             try{
@@ -629,6 +526,17 @@ const resolvers = {
         // Mutations de objetos
         async addEquipo(obj, { input }) {
             try{
+                if (input.cantidad <= 0) {
+                    throw new Error('La cantidad debe ser mayor a 0');
+                }
+
+                const equipoExistente = await Equipo.findOne({ codigo: input.codigo });
+                if (equipoExistente) {
+                    equipoExistente.cantidad += input.cantidad;
+                    await equipoExistente.save();
+                    return equipoExistente;
+                }
+
                 const equipo = new Equipo(input);
                 await equipo.save();
                 return equipo;
@@ -654,6 +562,11 @@ const resolvers = {
         },
         async addHerramienta(obj, { input }) {
             try{
+                if (input.cantidad <= 0) {
+                    throw new Error('La cantidad debe ser mayor a 0');
+                }
+
+
                 const herramienta = new Herramienta(input);
                 await herramienta.save();
                 return herramienta;

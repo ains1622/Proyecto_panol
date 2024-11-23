@@ -11,67 +11,27 @@ const typeDefs = gql`
     #DEFINICIONES DE OBJETOS
     
       
-    #Definicion de Equipo 
+    #Definicion de Item 
      
-    type Equipo {
+    type Item{
         id: ID!
         nombre: String!
         codigo: Int!
         cantidad: Int!
+        tipo: String!
         sede: Sede!
     }
       
-    #Definicion de input para Equipo
+    #Definicion de input para Item
       
-    input EquipoInput {
+    input ItemInput {
         nombre: String!
         codigo: Int!
         cantidad: Int!
+        tipo: String!
         sede: SedeInput!
     }
-     
-    #Definicion de Herramienta 
-     
-    type Herramienta {
-        id: ID!
-        nombre: String!
-        codigo: Int!
-        cantidad: Int!
-        sede: Sede!
-    }
-     
-    #Definicion de input para Herramienta  
-     
-    input HerramientaInput {
-        nombre: String!
-        codigo: Int!
-        cantidad: Int!
-        sede: SedeInput!
-    }
-
-      
-    #Definicion de Material 
-     
-    type Material {
-        id: ID!
-        nombre: String!
-        cantidad: Int!
-        codigo: Int!
-        sede: Sede!
-    }
-     
-    #Definicion de input para Material  
-     
-    input MaterialInput {
-        nombre: String!
-        cantidad: Int!
-        codigo: Int!
-        sede: SedeInput!
-    }
-
-    
     #DEFINICIONES GEOGRAFICAS
-     
      
     #Sede  
      
@@ -120,17 +80,15 @@ const typeDefs = gql`
     input RegionInput {
         nombre: String!
     }
-     
-    #DEFINICIONES PARA PRESTAMOS 
-    
-      
     #Definicion para Prestamo 
     
     type Prestamo{
         id: ID!
         cantidad: Int!
-        fecha: String!
-        devolucion: String!
+        fecha: Date!
+        devolucion: Date!
+        entidad: Entidad!
+        item: Item!
     }
       
     #Definicion para input de Prestamo 
@@ -139,139 +97,22 @@ const typeDefs = gql`
         cantidad: Int!
         fecha: String!
         devolucion: String!
+        entidad: EntidadInput!
     }
-     
-    #Prestamo Equipo Estudiante
-    
-    type PrestamoEquipoE {
-        id: ID!
-        estudiante: Estudiante!
-        prestamo: Prestamo!
-        sede: Sede!
-        equipo: Equipo!
-    }
-     
-    #input para Prestamo Equipo Estudiante 
-    
-    input PrestamoEquipoEInput {
-        estudiante: EstudianteInput!
-        prestamo: PrestamoInput!
-        sede: SedeInput!
-        equipo: EquipoInput!
-    }
-     
-    #Prestamo Equipo Docente
-    
-    type PrestamoEquipoD {
-        id: ID!
-        docente: Docente!
-        prestamo: Prestamo!
-        sede: Sede!
-        equipo: Equipo!
-        escuela: String!
-        ramo: String!
-    }
-     
-    #input para Prestamo Equipo Docente 
-    
-    input PrestamoEquipoDInput {
-        docente: DocenteInput!
-        prestamo: PrestamoInput!
-        sede: SedeInput!
-        equipo: EquipoInput!
-        escuela: String!
-        ramo: String!
-    }
-     
-    #Prestamo Herramienta Estudiante
-    
-    type PrestamoHerramientaE {
-        id: ID!
-        estudiante: Estudiante!
-        prestamo: Prestamo!
-        sede: Sede!
-        herramienta: Herramienta!
-    }
-     
-    #input para Prestamo Herramienta Estudiante
-    
-    input PrestamoHerramientaEInput {
-        estudiante: EstudianteInput!
-        prestamo: PrestamoInput!
-        sede: SedeInput!
-        herramienta: HerramientaInput!
-    }
-     
-    #Prestamo Herramienta Docente
-    
-    type PrestamoHerramientaD {
-        id: ID!
-        docente: Docente!
-        prestamo: Prestamo!
-        sede: Sede!
-        herramienta: Herramienta!
-        escuela: String!
-        ramo: String!
-    }
-     
-    #input para Prestamo Herramienta Docente 
-    
-    input PrestamoHerramientaDInput {
-        docente: DocenteInput!
-        prestamo: PrestamoInput!
-        sede: SedeInput!
-        herramienta: HerramientaInput!
-        escuela: String!
-        ramo: String!
-    }
-     
-    #Prestamo Material Estudiante
-    
-    type PrestamoMaterialE {
-        id: ID!
-        estudiante: Estudiante!
-        prestamo: Prestamo!
-        sede: Sede!
-        material: Material!
-    }
-     
-    #input para Prestamo Material Estudiante 
-    
-    input PrestamoMaterialEInput {
-        estudiante: EstudianteInput!
-        prestamo: PrestamoInput!
-        sede: SedeInput!
-        material: MaterialInput!
-    }
-     
-    #Prestamo Material Docente
-    
-    type PrestamoMaterialD {
-        id: ID!
-        docente: Docente!
-        prestamo: Prestamo!
-        sede: Sede!
-        material: Material!
-        escuela: String!
-        ramo: String!
-    }
-     
-    #input para Prestamo Material Docente 
-     
-    input PrestamoMaterialDInput {
-        escuela: String!
-        docente: DocenteInput!
-        prestamo: PrestamoInput!
-        sede: SedeInput!
-        material: MaterialInput!
-        ramo: String!
-    }
-    
     #DEFINICIONES DE USUARIOS
-    
     
     #Definicion de Usuario
     
+    type Entidad{
+        tipo: String!
+        referencia: ID!
+    }
+
+    type EntidadInput{
+        tipo: String!
+        referencia: ID!
+    }
+
     type  Usuario {
         id: ID!
         nombre: String!
@@ -343,47 +184,25 @@ const typeDefs = gql`
         sede: SedeInput!
     }
 
-    union PrestamosEquiposUnion = PrestamoEquipoE | PrestamoEquipoD
-    union PrestamosHerramientasUnion = PrestamoHerramientaE | PrestamoHerramientaD
-    union PrestamosMaterialesUnion = PrestamoMaterialE | PrestamoMaterialD
-
-
-    union UsuariosUnion = Estudiante | Docente
     type Query{
          
-        #QUERIES DE OBJETOS 
-        
+        #QUERIES DE Item  
          
-        #Queries de Equipo  
-         
-        getEquipos: [Equipo]
-        getEquipo(id: ID!): Equipo
-        getEquiposBySede(sede: String!): [Equipo]
-        getEquiposByComuna(comuna: String!): [Equipo]
-        getEquiposByNombre(nombre: String!): [Equipo]
-        getEquipoByCodigo(codigo: Int!): Equipo
-         
-        #Queries de Herramienta  
-        
-        getHerramientas: [Herramienta]
-        getHerramienta(id: ID!): Herramienta
-        getHerramientasBySede(sede: String!): [Herramienta]
-        getHerramientasByComuna(comuna: String!): [Herramienta]
-        getHerramientasByNombre(nombre: String!): [Herramienta]
-        getHerramientaByCodigo(codigo: Int!): Herramienta
-         
-        #Queries de Material  
-        
-        getMateriales: [Material]
-        getMaterial(id: ID!): Material
-        getMaterialesBySede(sede: String!): [Material]
-        getMaterialesByComuna(comuna: String!): [Material]
-        getMaterialesByNombre(nombre: String!): [Material]
-        getMaterialByCodigo(codigo: Int!): Material
-         
+        getItems: [Item]
+        getItemsByTipo(tipo: String!): [Item]
+        getItemById(id: ID!): Item
+        getItemsBySede(sede: String!): [Item]
+        getItemsByComuna(comuna: String!): [Item]
+        getItemsByCiudad(ciudad: String!): [Item]
+        getItemsByRegion(region: String!): [Item]
+        getItemsByTipoYSede(tipo: String!, sede: String!): [Item]
+        getItemsByTipoYComuna(tipo: String!, comuna: String!): [Item]
+        getItemsByTipoYCiudad(tipo: String!, ciudad: String!): [Item]
+        getItemsByTipoYRegion(tipo: String!, region: String!): [Item]
+        getItemsByNombre(nombre: String!): [Item]
+        getItemByCodigo(codigo: Int!): Item
         #QUERIES GEOGRAFICAS 
         
-         
         #Queries de Sede 
         
         getSedes: [Sede]
@@ -411,36 +230,17 @@ const typeDefs = gql`
         getRegion(id: ID!): Region
         getRegionByNombre(nombre: String!): Region
          
-        #QUERIES DE PRESTAMOS 
+        #QUERIES DE PRESTAMO
         
-         
-        #Queries de Prestamo Equipo 
-        
-        getPrestamosEquipos: [PrestamosEquiposUnion]
-        getPrestamosByNombreEquipo(nombre: String!): [PrestamosEquiposUnion]
-        getPrestamosByCodigoEquipo(codigo: Int!): [PrestamosEquiposUnion]
-        getPrestamosEquipoByEstudiante(estudiante: String!): [PrestamoEquipoE]
-        getPrestamosEquipoByDocente(docente: String!): [PrestamoEquipoD]
-         
-        #Queries de Prestamo Herramienta 
-        
-        getPrestamosHerramientas: [PrestamosHerramientasUnion]
-        getPrestamosByNombreHerramienta(nombre: String!): [PrestamosHerramientasUnion]
-        getPrestamosByCodigoHerramienta(codigo: Int!): [PrestamosHerramientasUnion]
-        getPrestamosHerramientasByEstudiante(estudiante: String!): [PrestamoHerramientaE]
-        getPrestamosHerramientasByDocente(docente: String!): [PrestamoHerramientaD]
-         
-        #Queries de Prestamo Material 
-        
-        getPrestamosMateriales: [PrestamosMaterialesUnion]
-        getPrestamosByNombreMaterial(nombre: String!): [PrestamosMaterialesUnion]
-        getPrestamosByCodigoMaterial(codigo: Int!): [PrestamosMaterialesUnion]
-        getPrestamosMaterialesByEstudiante(estudiante: String!): [PrestamoMaterialE]
-        getPrestamosMaterialesByDocente(docente: String!): [PrestamoMaterialD]
-         
+        getPrestamosByEntidad(tipo: String!, referencia: ID!): [Prestamo]
+        getPrestamosByItem(itemid: ID!): [Prestamo]
+        getPrestamosBySede(sede: String!): [Prestamo]
+        getPrestamosByFecha(fecha: String!): [Prestamo]
+        getPrestamosByDevolucion(devolucion: String!): [Prestamo]
+        getPrestamos: [Prestamo]
+
         #QUERIES DE USUARIOS 
         
-         
         #Queries de Estudiante 
         
         getEstudiantes: [Estudiante]
@@ -465,10 +265,7 @@ const typeDefs = gql`
         getUsuariosByNombre(nombre: String!): [UsuariosUnion]
         getUsuariosBySede(sede: String!): [UsuariosUnion]
          
-        #QUERIES DE CARRERAS 
-        
-         
-        #Queries de Carrera 
+        #QUERIES DE CARRERA
         
         getCarreras: [Carrera]
         getCarrera(id: ID!): Carrera
@@ -477,15 +274,11 @@ const typeDefs = gql`
         getCarrerasBySede(sede: String!): [Carrera]
     }
     type Mutation {
+        #Mutations de Item
          
-        #MUTATIONS DE OBJETOS 
-        
-          
-        #Mutations de Equipo 
-         
-        addEquipo(input: EquipoInput): Equipo
-        updateEquipo(id: ID!, input: EquipoInput): Equipo
-        deleteEquipo(id: ID!): Alert
+        addItem(input: ItemInput): Item
+        updateItem(id: ID!, input: ItemInput): Item
+        deleteItem(id: ID!): Alert
          
         #Mutations de Herramienta 
         
@@ -527,47 +320,13 @@ const typeDefs = gql`
         deleteRegion(id: ID!): Alert
          
         #MUTATIONS DE PRESTAMOS 
-        
-         
-        #Mutations de Prestamo Equipo Estudiante 
-        
-        addPrestamoEquipoE(input: PrestamoEquipoEInput): PrestamoEquipoE
-        updatePrestamoEquipoE(id: ID!, input: PrestamoEquipoEInput): PrestamoEquipoE
-        deletePrestamoEquipoE(id: ID!): Alert
-         
-        #Mutations de Prestamo Equipo Docente 
-        
-        addPrestamoEquipoD(input: PrestamoEquipoDInput): PrestamoEquipoD
-        updatePrestamoEquipoD(id: ID!, input: PrestamoEquipoDInput): PrestamoEquipoD
-        deletePrestamoEquipoD(id: ID!): Alert
-         
-        #Mutations de Prestamo Herramienta Estudiante 
-        
-        addPrestamoHerramientaE(input: PrestamoHerramientaEInput): PrestamoHerramientaE
-        updatePrestamoHerramientaE(id: ID!, input: PrestamoHerramientaEInput): PrestamoHerramientaE
-        deletePrestamoHerramientaE(id: ID!): Alert
-         
-        #Mutations de Prestamo Herramienta Docente 
-        
-        addPrestamoHerramientaD(input: PrestamoHerramientaDInput): PrestamoHerramientaD
-        updatePrestamoHerramientaD(id: ID!, input: PrestamoHerramientaDInput): PrestamoHerramientaD
-        deletePrestamoHerramientaD(id: ID!): Alert
-         
-        #Mutations de Prestamo Material Estudiante 
-        
-        addPrestamoMaterialE(input: PrestamoMaterialEInput): PrestamoMaterialE
-        updatePrestamoMaterialE(id: ID!, input: PrestamoMaterialEInput): PrestamoMaterialE
-        deletePrestamoMaterialE(id: ID!): Alert
-         
-        #Mutations de Prestamo Material Docente 
-        
-        addPrestamoMaterialD(input: PrestamoMaterialDInput): PrestamoMaterialD
-        updatePrestamoMaterialD(id: ID!, input: PrestamoMaterialDInput): PrestamoMaterialD
-        deletePrestamoMaterialD(id: ID!): Alert
+
+        addPrestamo(input: PrestamoItemEInput): Prestamo
+        updatePrestamo(id: ID!, input: PrestamoItemEInput): Prestamo
+        deletePrestamo(id: ID!): Alert
          
         #MUTATIONS DE USUARIOS 
-        
-         
+
         #Mutations de Estudiante 
         
         addEstudiante(input: EstudianteInput): Estudiante

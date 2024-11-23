@@ -42,65 +42,23 @@ const docenteSchema = new mongoose.Schema({
     sede: sedeSchema
 });
 
-// Esquemas geograficos
-
-
 // Que se presta
-const equipoSchema = new mongoose.Schema({
+const itemSchema = new mongoose.Schema({
     nombre: String,
-    codigo: String,
+    codigo: Number,
     cantidad: Number,
+    tipo: {type: String, enum: ['Equipo', 'Herramienta', 'Material']},
     sede: sedeSchema
 });
-const herramientaSchema = new mongoose.Schema({
-    nombre: String,
-    cantidad: Number,
-    codigo: String,
-    sede: sedeSchema
-});
-
-const materialSchema = new mongoose.Schema({
-    nombre: String,
-    cantidad: Number,
-    codigo: String,
-    sede: sedeSchema
-});
-
 // Prestamos a usuarios de pañol
 const prestamoSchema = new mongoose.Schema({
     fecha: Date,
     devolucion: Date,
     cantidad: Number,
-});
-const prestamoEquipoESchema = new mongoose.Schema({
-    equipo: equipoSchema,
-    prestamo: prestamoSchema,
-    estudiante: estudianteSchema
-});
-const prestamoEquipoDSchema = new mongoose.Schema({
-    equipo: equipoSchema,
-    prestamo: prestamoSchema,
-    docente: docenteSchema
-});
-const prestamoHerramientaESchema = new mongoose.Schema({
-    herramienta: herramientaSchema,
-    prestamo: prestamoSchema,
-    estudiante: estudianteSchema
-});
-const prestamoHerramientaDSchema = new mongoose.Schema({
-    herramienta: herramientaSchema,
-    prestamo: prestamoSchema,
-    docente: docenteSchema
-});
-const prestamoMaterialESchema = new mongoose.Schema({
-    material: materialSchema,
-    prestamo: prestamoSchema,
-    estudiante: estudianteSchema
-});
-const prestamoMaterialDSchema = new mongoose.Schema({
-    material: materialSchema,
-    prestamo: prestamoSchema,
-    docente: docenteSchema
+    entidad: {
+        tipo :{type: String, enum: ['Estudiante', 'Docente']},
+        referencia:{ type: Schema.Types.ObjectId, refPath: 'entidad.tipo'}
+    }
 });
 
 // Usuarios de pañol
@@ -111,9 +69,7 @@ const Usuario = mongoose.model('Usuario', usuarioSchema);
 const Carrera = mongoose.model('Carrera', carreraSchema);
 
 // Elementos de pañol
-const Equipo = mongoose.model('Equipo', equipoSchema);
-const Herramienta = mongoose.model('Herramienta', herramientaSchema);
-const Material = mongoose.model('Material', materialSchema);
+const Item = mongoose.model('Item', itemSchema);
 
 // Esquemas geograficos
 const Sede = mongoose.model('Sede', sedeSchema);
@@ -123,12 +79,5 @@ const Region = mongoose.model('Region', regionSchema);
 
 // Prestamos
 const Prestamo = mongoose.model('Prestamo', prestamoSchema);
-const PrestamoEquipoE = mongoose.model('PrestamoEquipoE', prestamoEquipoESchema);
-const PrestamoEquipoD = mongoose.model('PrestamoEquipoD', prestamoEquipoDSchema);
-const PrestamoHerramientaE = mongoose.model('PrestamoHerramientaE', prestamoHerramientaESchema);
-const PrestamoHerramientaD = mongoose.model('PrestamoHerramientaD', prestamoHerramientaDSchema);
-const PrestamoMaterialE = mongoose.model('PrestamoMaterialE', prestamoMaterialESchema);
-const PrestamoMaterialD = mongoose.model('PrestamoMaterialD', prestamoMaterialDSchema);
 
-module.exports = { Equipo, Estudiante, Usuario, Docente, Carrera, Sede, Herramienta, Material, Ciudad, Comuna, Region, Prestamo, PrestamoEquipoE, PrestamoEquipoD,
-     PrestamoHerramientaE, PrestamoHerramientaD, PrestamoMaterialE, PrestamoMaterialD };
+module.exports = {Estudiante, Usuario, Docente, Carrera, Sede, Item, Ciudad, Comuna, Region, Prestamo };
