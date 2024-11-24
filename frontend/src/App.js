@@ -1,156 +1,125 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import * as Yup from 'yup';
+import { Formik, Field, Form, ErrorMessage } from 'formik';
 
 const App = () => {
-  // Estado para manejar la opción seleccionada
   const [opcionSeleccionada, setOpcionSeleccionada] = useState('');
-  const [formData, setFormData] = useState({
-    usuario:{
-      nombre: '',
-      rut: '',
-      email: '',
-      telefono: ''
-    },
-    carrera: {
-      nombre: '',
-      escuela: '',
-      // LLeva sede
-    },
-    sede: {
-      nombre: '',
-      direccion: '',
-      comuna: '',
-    },
-    item: {
-      nombre: '',
-      codigo: '',
-      cantidad: '',
-      tipo: '',
-      // LLeva sede
-    },
-    docente: {
-      ramo: '',
-      escuela: ''
-    },
-    prestamo: {
-      cantidad: '',
-      fecha: '',
-      devolucion: '',
-      entidad: {
-        tipo: '',
-        referencia: ''
-      }
-    }
-    // Estudiante compo de usuario y carrera
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  // Maneja el cambio de los valores del formulario
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    
-    // Divide el "name" en partes si es jerárquico (e.g., usuario.nombre)
-    const keys = name.split('.');
-  
-    setFormData((prevData) => {
-      let data = { ...prevData }; // Clona el estado actual
-      let ref = data; // Puntero para navegar dentro del objeto
-  
-      // Recorre las claves hasta la última
-      for (let i = 0; i < keys.length - 1; i++) {
-        if (!ref[keys[i]]) ref[keys[i]] = {}; // Si no existe, inicialízalo
-        ref = ref[keys[i]]; // Navega hacia el siguiente nivel
-      }
-  
-      // Asigna el valor al último nivel
-      ref[keys[keys.length - 1]] = value;
-      return data; // Retorna la copia modificada
-    });
-  };
-  
-
-  // Maneja la selección de la opción
-  const handleOptionChange = (e) => {
-    setOpcionSeleccionada(e.target.value);
-    setFormData({
-      usuario:{
-        nombre: '',
-        rut: '',
-        email: '',
-        telefono: ''
-      },
-      carrera: {
-        nombre: '',
-        escuela: '',
-        // LLeva sede
-      },
-      sede: {
-        nombre: '',
-        direccion: '',
-        comuna: '',
-      },
-      item: {
-        nombre: '',
-        codigo: '',
-        cantidad: '',
-        tipo: '',
-        // LLeva sede
-      },
-      docente: {
-        ramo: '',
-        escuela: ''
-      },
-      prestamo: {
-        cantidad: '',
-        fecha: '',
-        devolucion: '',
-        entidad: {
-          tipo: '',
-          referencia: ''
-        }
-      }
-      // Estudiante compo de usuario y carrera
-    }); // Resetear campos del formulario
+  const camposPorOpcion = {
+    estudiante: [
+      { name: 'nombre', label: 'Nombre', type: 'text' },
+      { name: 'rut', label: 'RUT', type: 'text' },
+      { name: 'email', label: 'Email', type: 'email' },
+      { name: 'telefono', label: 'Telefono', type: 'text' },
+      { name: 'carreraNombre', label: 'Nombre Carrera', type: 'text' },
+      { name: 'carreraEscuela', label: 'Escuela Carrera', type: 'text' },
+      { name: 'sedeNombre', label: 'Nombre Sede', type: 'text' },
+      { name: 'sedeDireccion', label: 'Dirección Sede', type: 'text' },
+      { name: 'sedeComuna', label: 'Nombre Comuna', type: 'text' },
+    ],
+    docente: [
+      { name: 'nombre', label: 'Nombre', type: 'text' },
+      { name: 'rut', label: 'RUT', type: 'text' },
+      { name: 'email', label: 'Email', type: 'email' },
+      { name: 'telefono', label: 'Telefono', type: 'text' },
+      { name: 'docenteRamo', label: 'Ramo', type: 'text' },
+      { name: 'docenteEscuela', label: 'Escuela', type: 'text' },
+      { name: 'sedeNombre', label: 'Nombre Sede', type: 'text' },
+      { name: 'sedeDireccion', label: 'Dirección Sede', type: 'text' },
+      { name: 'sedeComuna', label: 'Nombre Comuna', type: 'text' },
+    ],
+    prestamo: [
+      { name: 'prestamoCantidad', label: 'Cantidad', type: 'number' },
+      { name: 'prestamoFecha', label: 'Fecha', type: 'date' },
+      { name: 'prestamoDevolucion', label: 'Devolución', type: 'date' },
+      { name: 'prestamoEntidadTipo', label: 'Entidad Tipo', type: 'text' },
+      { name: 'prestamoEntidadReferencia', label: 'Referencia', type: 'text' },
+    ],
+    item: [
+      { name: 'itemNombre', label: 'Nombre', type: 'text' },
+      { name: 'itemCodigo', label: 'Código', type: 'number' },
+      { name: 'itemCantidad', label: 'Cantidad', type: 'number' },
+      { name: 'itemTipo', label: 'Tipo', type: 'text' },
+      { name: 'sedeNombre', label: 'Nombre Sede', type: 'text' },
+      { name: 'sedeDireccion', label: 'Dirección Sede', type: 'text' },
+      { name: 'sedeComuna', label: 'Nombre Comuna', type: 'text' },
+    ],
   };
 
-  // Enviar el formulario
-  const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevenir el comportamiento por defecto del formulario (recarga de página)
-  
+  const validationSchemas = {
+    estudiante: Yup.object({
+      nombre: Yup.string().required('Nombre es obligatorio'),
+      rut: Yup.string().required('RUT es obligatorio'),
+      email: Yup.string().email('Email no válido').required('Email es obligatorio'),
+      telefono: Yup.string().required('Teléfono es obligatorio'),
+      carreraNombre: Yup.string().required('Nombre de carrera es obligatorio'),
+      carreraEscuela: Yup.string().required('Escuela de carrera es obligatoria'),
+      sedeNombre: Yup.string().required('Nombre de sede es obligatorio'),
+      sedeDireccion: Yup.string().required('Dirección de sede es obligatoria'),
+      sedeComuna: Yup.string().required('Comuna de sede es obligatoria'),
+    }),
+    docente: Yup.object({
+      nombre: Yup.string().required('Nombre es obligatorio'),
+      rut: Yup.string().required('RUT es obligatorio'),
+      email: Yup.string().email('Email no válido').required('Email es obligatorio'),
+      telefono: Yup.string().required('Teléfono es obligatorio'),
+      docenteRamo: Yup.string().required('Ramo es obligatorio'),
+      docenteEscuela: Yup.string().required('Escuela es obligatoria'),
+      sedeNombre: Yup.string().required('Nombre de sede es obligatorio'),
+      sedeDireccion: Yup.string().required('Dirección de sede es obligatoria'),
+      sedeComuna: Yup.string().required('Comuna de sede es obligatoria'),
+    }),
+    prestamo: Yup.object({
+      prestamoCantidad: Yup.number().required('Cantidad es obligatoria').positive('Debe ser un número positivo'),
+      prestamoFecha: Yup.date().required('Fecha es obligatoria'),
+      prestamoDevolucion: Yup.date().required('Fecha de devolución es obligatoria'),
+      prestamoEntidadTipo: Yup.string().required('Tipo de entidad es obligatorio'),
+      prestamoEntidadReferencia: Yup.string().required('Referencia es obligatoria'),
+    }),
+    item: Yup.object({
+      itemNombre: Yup.string().required('Nombre de item es obligatorio'),
+      itemCodigo: Yup.number().required('Código de item es obligatorio').positive('Debe ser un número positivo'),
+      itemCantidad: Yup.number().required('Cantidad de item es obligatoria').positive('Debe ser un número positivo'),
+      itemTipo: Yup.string().required('Tipo de item es obligatorio'),
+      sedeNombre: Yup.string().required('Nombre de sede es obligatorio'),
+      sedeDireccion: Yup.string().required('Dirección de sede es obligatoria'),
+      sedeComuna: Yup.string().required('Comuna de sede es obligatoria'),
+    }),
+  };
+
+  const handleSubmit = async (values) => {
+    const endpoint = {
+      estudiante: 'http://localhost:5000/api/estudiantes',
+      docente: 'http://localhost:5000/api/docentes',
+      prestamo: 'http://localhost:5000/api/prestamos',
+      item: 'http://localhost:5000/api/items',
+    }[opcionSeleccionada];
+
+    setIsLoading(true);
+    setError('');
+
     try {
-      // Define la URL del endpoint del backend donde enviarás los datos
-      let endpoint = '';
-  
-      // Dependiendo de la opción seleccionada, el endpoint cambiará
-      if (opcionSeleccionada === 'estudiante') {
-        endpoint = 'http://localhost:5000/api/estudiantes'; // Cambia esta URL al endpoint correcto de tu API
-      } else if (opcionSeleccionada === 'docente') {
-        endpoint = 'http://localhost:5000/api/docentes'; // Endpoint para docentes
-      } else if (opcionSeleccionada === 'prestamo') {
-        endpoint = 'http://localhost:5000/api/prestamos'; // Endpoint para prestamos
-      } else if (opcionSeleccionada === 'item') {
-        endpoint = 'http://localhost:5000/api/items'; // Endpoint para items
-      }
-  
-      // Realiza la solicitud POST para enviar los datos al backend
-      const response = await axios.post(endpoint, formData);
-  
-      // Aquí puedes manejar la respuesta, como mostrar un mensaje de éxito
+      const response = await axios.post(endpoint, values);
       console.log('Datos enviados:', response.data);
       alert(`${opcionSeleccionada} agregado exitosamente!`);
     } catch (error) {
       console.error('Error al enviar los datos:', error);
-      alert('Hubo un error al enviar los datos.');
+      setError('Hubo un error al enviar los datos.');
+    } finally {
+      setIsLoading(false);
     }
   };
-  
 
   return (
     <div>
       <h1>Formulario Dinámico</h1>
-      <form onSubmit={handleSubmit}>
+      <form>
         <div>
           <label htmlFor="opcion">Selecciona lo que quieres agregar:</label>
-          <select id="opcion" value={opcionSeleccionada} onChange={handleOptionChange}>
+          <select id="opcion" value={opcionSeleccionada} onChange={(e) => setOpcionSeleccionada(e.target.value)}>
             <option value="">--Selecciona una opción--</option>
             <option value="estudiante">Estudiante</option>
             <option value="docente">Docente</option>
@@ -160,434 +129,28 @@ const App = () => {
         </div>
 
         {opcionSeleccionada && (
-          <div>
-            <h2>Agregar {opcionSeleccionada.charAt(0).toUpperCase() + opcionSeleccionada.slice(1)}</h2>
-            
-                   {/* Opcion Estudiante */}
-
-            {opcionSeleccionada === 'estudiante' && (
-              <>
-                <div>
-                  <label htmlFor="nombre">Nombre:</label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    name="usuario.nombre"
-                    value={formData.usuario.nombre}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="rut">RUT:</label>
-                  <input
-                    type="text"
-                    id="rut"
-                    name="usuario.rut"
-                    value={formData.usuario.rut || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email">Email:</label>
-                  <input
-                    type="text"
-                    id="email"
-                    name="usuario.email"
-                    value={formData.usuario.email || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="telefono">Telefono:</label>
-                  <input
-                    type="text"
-                    id="telefono"
-                    name="usuario.telefono"
-                    value={formData.usuario.telefono || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="nombre">Nombre Carrera:</label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    name="carrera.nombre"
-                    value={formData.carrera.nombre || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="escuela">Escuela Carrera:</label>
-                  <input
-                    type="text"
-                    id="escuela"
-                    name="carrera.escuela"
-                    value={formData.carrera.escuela || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="nombre">Nombre Sede:</label>
-                  <input
-                    type="text"
-                    id="sede"
-                    name="sede.nombre"
-                    value={formData.sede.nombre || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="direccion">Direccion Sede:</label>
-                  <input
-                    type="text"
-                    id="direccion"
-                    name="sede.direccion"
-                    value={formData.sede.direccion || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="comuna">Nombre Comuna:</label>
-                  <input
-                    type="text"
-                    id="comuna"
-                    name="sede.comuna"
-                    value={formData.sede.comuna || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </>
+          <Formik
+            initialValues={Object.fromEntries(camposPorOpcion[opcionSeleccionada].map((campo) => [campo.name, '']))}
+            validationSchema={validationSchemas[opcionSeleccionada]}
+            onSubmit={handleSubmit}
+          >
+            {({ isSubmitting }) => (
+              <Form>
+                <h2>Agregar {opcionSeleccionada.charAt(0).toUpperCase() + opcionSeleccionada.slice(1)}</h2>
+                {camposPorOpcion[opcionSeleccionada].map((campo) => (
+                  <div key={campo.name}>
+                    <label htmlFor={campo.name}>{campo.label}:</label>
+                    <Field type={campo.type} id={campo.name} name={campo.name} />
+                    <ErrorMessage name={campo.name} component="div" style={{ color: 'red' }} />
+                  </div>
+                ))}
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+                <button type="submit" disabled={isSubmitting || isLoading}>
+                  {isLoading ? 'Enviando...' : 'Enviar'}
+                </button>
+              </Form>
             )}
-
-                  {/* Opcion Docente */}
-
-            {opcionSeleccionada === 'docente' && (
-              <>
-                <div>
-                  <label htmlFor="nombre">Nombre:</label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    name="usuario.nombre"
-                    value={formData.usuario.nombre}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="rut">RUT:</label>
-                  <input
-                    type="text"
-                    id="rut"
-                    name="usuario.rut"
-                    value={formData.usuario.rut || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email">Email:</label>
-                  <input
-                    type="text"
-                    id="email"
-                    name="usuario.email"
-                    value={formData.usuario.email || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="telefono">Telefono:</label>
-                  <input
-                    type="text"
-                    id="telefono"
-                    name="usuario.telefono"
-                    value={formData.usuario.telefono || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="ramo">Ramo:</label>
-                  <input
-                    type="text"
-                    id="ramo"
-                    name="docente.ramo"
-                    value={formData.docente.ramo || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="escuela">Escuela:</label>
-                  <input
-                    type="text"
-                    id="escuela"
-                    name="docente.escuela"
-                    value={formData.docente.escuela || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="nombre">Nombre Sede:</label>
-                  <input
-                    type="text"
-                    id="sede"
-                    name="sede.nombre"
-                    value={formData.sede.nombre || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="direccion">Direccion Sede:</label>
-                  <input
-                    type="text"
-                    id="direccion"
-                    name="sede.direccion"
-                    value={formData.sede.direccion || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="comuna">Nombre Comuna:</label>
-                  <input
-                    type="text"
-                    id="comuna"
-                    name="sede.comuna"
-                    value={formData.sede.comuna || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </>
-            )}
-
-                  {/* Opcion Prestamo */}
-
-            {opcionSeleccionada === 'prestamo' && (
-              <>
-                <div>
-                  <label htmlFor="cantidad">Cantidad:</label>
-                  <input
-                    type="number"
-                    id="cantidad"
-                    name="prestamo.cantidad"
-                    value={formData.prestamo.cantidad}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="fecha">Fecha:</label>
-                  <input
-                    type="text"
-                    id="fecha"
-                    name="prestamo.fecha"
-                    value={formData.prestamo.fecha || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="devolucion">Devolucion:</label>
-                  <input
-                    type="text"
-                    id="devolucion"
-                    name="prestamo.devolucion"
-                    value={formData.prestamo.devolucion || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="tipo">Entidad tipo:</label>
-                  <input
-                    type="text"
-                    id="tipo"
-                    name="prestamo.entidad.tipo"
-                    value={formData.prestamo.entidad.tipo || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="nombre">Nombre Item:</label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    name="item.nombre"
-                    value={formData.item.nombre}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="codigo">Codigo Item:</label>
-                  <input
-                    type="number"
-                    id="codigo"
-                    name="item.codigo"
-                    value={formData.item.codigo}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="cantidad">Cantidad Item:</label>
-                  <input
-                    type="number"
-                    id="cantidad"
-                    name="item.cantidad"
-                    value={formData.item.cantidad}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="tipo">Tipo Item:</label>
-                  <input
-                    type="text"
-                    id="tipo"
-                    name="item.tipo"
-                    value={formData.item.tipo || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="nombre">Nombre Sede:</label>
-                  <input
-                    type="text"
-                    id="sede"
-                    name="sede.nombre"
-                    value={formData.sede.nombre || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="direccion">Direccion Sede:</label>
-                  <input
-                    type="text"
-                    id="direccion"
-                    name="sede.direccion"
-                    value={formData.sede.direccion || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="comuna">Nombre Comuna:</label>
-                  <input
-                    type="text"
-                    id="comuna"
-                    name="sede.comuna"
-                    value={formData.sede.comuna || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </>
-            )}
-
-                  {/* Opcion Item */}
-
-            {opcionSeleccionada === 'item' && (
-              <>
-                <div>
-                  <label htmlFor="nombre">Nombre:</label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    name="item.nombre"
-                    value={formData.item.nombre}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="codigo">Codigo:</label>
-                  <input
-                    type="number"
-                    id="codigo"
-                    name="item.codigo"
-                    value={formData.item.codigo}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="cantidad">Cantidad:</label>
-                  <input
-                    type="number"
-                    id="cantidad"
-                    name="item.cantidad"
-                    value={formData.item.cantidad}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="tipo">Tipo:</label>
-                  <input
-                    type="text"
-                    id="tipo"
-                    name="item.tipo"
-                    value={formData.item.tipo || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="nombre">Nombre Sede:</label>
-                  <input
-                    type="text"
-                    id="sede"
-                    name="sede.nombre"
-                    value={formData.sede.nombre || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="direccion">Direccion Sede:</label>
-                  <input
-                    type="text"
-                    id="direccion"
-                    name="sede.direccion"
-                    value={formData.sede.direccion || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="comuna">Nombre Comuna:</label>
-                  <input
-                    type="text"
-                    id="comuna"
-                    name="sede.comuna"
-                    value={formData.sede.comuna || ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </>
-            )}
-            <button type="submit">Enviar</button>
-          </div>
+          </Formik>
         )}
       </form>
     </div>
