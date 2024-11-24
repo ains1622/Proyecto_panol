@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import * as Yup from 'yup';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const App = () => {
   const [opcionSeleccionada, setOpcionSeleccionada] = useState('');
@@ -12,7 +13,7 @@ const App = () => {
     estudiante: [
       { name: 'nombre', label: 'Nombre', type: 'text' },
       { name: 'rut', label: 'RUT', type: 'text' },
-      { name: 'email', label: 'Email', type: 'email' },
+      { name: 'email', label: 'E-mail', type: 'email' },
       { name: 'telefono', label: 'Telefono', type: 'text' },
       { name: 'carreraNombre', label: 'Nombre Carrera', type: 'text' },
       { name: 'carreraEscuela', label: 'Escuela Carrera', type: 'text' },
@@ -23,7 +24,7 @@ const App = () => {
     docente: [
       { name: 'nombre', label: 'Nombre', type: 'text' },
       { name: 'rut', label: 'RUT', type: 'text' },
-      { name: 'email', label: 'Email', type: 'email' },
+      { name: 'email', label: 'E-mail', type: 'email' },
       { name: 'telefono', label: 'Telefono', type: 'text' },
       { name: 'docenteRamo', label: 'Ramo', type: 'text' },
       { name: 'docenteEscuela', label: 'Escuela', type: 'text' },
@@ -53,7 +54,7 @@ const App = () => {
     estudiante: Yup.object({
       nombre: Yup.string().required('Nombre es obligatorio'),
       rut: Yup.string().required('RUT es obligatorio'),
-      email: Yup.string().email('Email no válido').required('Email es obligatorio'),
+      email: Yup.string().email('E-mail no válido').required('Email es obligatorio'),
       telefono: Yup.string().required('Teléfono es obligatorio'),
       carreraNombre: Yup.string().required('Nombre de carrera es obligatorio'),
       carreraEscuela: Yup.string().required('Escuela de carrera es obligatoria'),
@@ -114,45 +115,69 @@ const App = () => {
   };
 
   return (
-    <div>
-      <h1>Formulario Dinámico</h1>
-      <form>
-        <div>
-          <label htmlFor="opcion">Selecciona lo que quieres agregar:</label>
-          <select id="opcion" value={opcionSeleccionada} onChange={(e) => setOpcionSeleccionada(e.target.value)}>
-            <option value="">--Selecciona una opción--</option>
-            <option value="estudiante">Estudiante</option>
-            <option value="docente">Docente</option>
-            <option value="prestamo">Prestamo</option>
-            <option value="item">Item</option>
-          </select>
+    <div className="container-fluid bg-light py-5">
+      <div className="container">
+        <h1 className="text-center text-primary mb-4">Formulario Dinámico</h1>
+        <div className="row justify-content-center">
+          <div className="col-12 col-md-6 mb-3">
+            <label htmlFor="opcion" className="form-label">Selecciona lo que quieres agregar:</label>
+            <select
+              id="opcion"
+              value={opcionSeleccionada}
+              onChange={(e) => setOpcionSeleccionada(e.target.value)}
+              className="form-select"
+            >
+              <option value="">--Selecciona una opción--</option>
+              <option value="estudiante">Estudiante</option>
+              <option value="docente">Docente</option>
+              <option value="prestamo">Prestamo</option>
+              <option value="item">Item</option>
+            </select>
+          </div>
         </div>
 
         {opcionSeleccionada && (
-          <Formik
-            initialValues={Object.fromEntries(camposPorOpcion[opcionSeleccionada].map((campo) => [campo.name, '']))}
-            validationSchema={validationSchemas[opcionSeleccionada]}
-            onSubmit={handleSubmit}
-          >
-            {({ isSubmitting }) => (
-              <Form>
-                <h2>Agregar {opcionSeleccionada.charAt(0).toUpperCase() + opcionSeleccionada.slice(1)}</h2>
-                {camposPorOpcion[opcionSeleccionada].map((campo) => (
-                  <div key={campo.name}>
-                    <label htmlFor={campo.name}>{campo.label}:</label>
-                    <Field type={campo.type} id={campo.name} name={campo.name} />
-                    <ErrorMessage name={campo.name} component="div" style={{ color: 'red' }} />
-                  </div>
-                ))}
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                <button type="submit" disabled={isSubmitting || isLoading}>
-                  {isLoading ? 'Enviando...' : 'Enviar'}
-                </button>
-              </Form>
-            )}
-          </Formik>
+          <div className="card shadow-lg">
+            <div className="card-body">
+              <h5 className="card-title text-center text-success mb-4">Agregar {opcionSeleccionada.charAt(0).toUpperCase() + opcionSeleccionada.slice(1)}</h5>
+              <Formik
+                initialValues={Object.fromEntries(camposPorOpcion[opcionSeleccionada].map((campo) => [campo.name, '']))}
+                validationSchema={validationSchemas[opcionSeleccionada]}
+                onSubmit={handleSubmit}
+              >
+                {({ isSubmitting }) => (
+                  <Form>
+                    <div className="row">
+                      {camposPorOpcion[opcionSeleccionada].map((campo) => (
+                        <div key={campo.name} className="col-12 col-md-6 mb-3">
+                          <label htmlFor={campo.name} className="form-label">{campo.label}</label>
+                          <Field
+                            type={campo.type}
+                            id={campo.name}
+                            name={campo.name}
+                            className="form-control"
+                          />
+                          <ErrorMessage name={campo.name} component="div" className="text-danger" />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="d-flex justify-content-center">
+                      <button
+                        type="submit"
+                        className="btn btn-primary btn-lg"
+                        disabled={isSubmitting || isLoading}
+                      >
+                        {isLoading ? 'Enviando...' : 'Enviar'}
+                      </button>
+                    </div>
+                    {error && <div className="text-danger text-center mt-3">{error}</div>}
+                  </Form>
+                )}
+              </Formik>
+            </div>
+          </div>
         )}
-      </form>
+      </div>
     </div>
   );
 };
