@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const {Schema} = mongoose;
 
 const regionSchema = new mongoose.Schema({
     nombre: String
@@ -26,14 +27,15 @@ const carreraSchema = new mongoose.Schema({
 
 // A quien se le presta
 const usuarioSchema = new mongoose.Schema({
-    nombre: String,
-    rut: String,
-    correo: String,
-    telefono: String
+    nombre: { type: String, required: true },  // Asegúrate de que el nombre sea obligatorio
+    rut: { type: String, required: true },     // El rut también es obligatorio
+    email: { type: String, required: true },   // Asegúrate de que el email sea obligatorio
+    telefono: { type: String, required: true }, // El teléfono también debería ser obligatorio
 });
-const estudianteSchema = new mongoose.Schema({
-    carrera: carreraSchema,
-    usuario: usuarioSchema
+
+const estudianteSchema = new Schema({
+    usuario: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },  // Referencia a Usuario
+    carrera: { type: Object, required: true },  // Carrera del estudiante
 });
 const docenteSchema = new mongoose.Schema({
     ramo: String,
@@ -52,13 +54,15 @@ const itemSchema = new mongoose.Schema({
 });
 // Prestamos a usuarios de pañol
 const prestamoSchema = new mongoose.Schema({
-    fecha: Date,
-    devolucion: Date,
     cantidad: Number,
+    fecha: String,
+    devolucion: String,
     entidad: {
         tipo :{type: String, enum: ['Estudiante', 'Docente']},
         referencia:{ type: Schema.Types.ObjectId, refPath: 'entidad.tipo'}
-    }
+    },
+    item: itemSchema,
+    sede: sedeSchema
 });
 
 // Usuarios de pañol

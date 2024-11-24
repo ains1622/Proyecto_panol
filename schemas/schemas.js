@@ -80,15 +80,18 @@ const typeDefs = gql`
     input RegionInput {
         nombre: String!
     }
+
+    
     #Definicion para Prestamo 
     
     type Prestamo{
         id: ID!
         cantidad: Int!
-        fecha: Date!
-        devolucion: Date!
+        fecha: String!
+        devolucion: String!
         entidad: Entidad!
         item: Item!
+        sede: Sede!
     }
       
     #Definicion para input de Prestamo 
@@ -98,6 +101,8 @@ const typeDefs = gql`
         fecha: String!
         devolucion: String!
         entidad: EntidadInput!
+        item: ID!
+        sede: ID!
     }
     #DEFINICIONES DE USUARIOS
     
@@ -108,7 +113,7 @@ const typeDefs = gql`
         referencia: ID!
     }
 
-    type EntidadInput{
+    input EntidadInput{
         tipo: String!
         referencia: ID!
     }
@@ -184,10 +189,13 @@ const typeDefs = gql`
         sede: SedeInput!
     }
 
+    union UsuariosUnion = Estudiante | Docente
+
     type Query{
          
         #QUERIES DE Item  
-         
+        
+        getItem(id: ID!): Item
         getItems: [Item]
         getItemsByTipo(tipo: String!): [Item]
         getItemById(id: ID!): Item
@@ -233,10 +241,11 @@ const typeDefs = gql`
         #QUERIES DE PRESTAMO
         
         getPrestamosByEntidad(tipo: String!, referencia: ID!): [Prestamo]
-        getPrestamosByItem(itemid: ID!): [Prestamo]
+        getPrestamosByItem(nombre: String!): [Prestamo]
         getPrestamosBySede(sede: String!): [Prestamo]
         getPrestamosByFecha(fecha: String!): [Prestamo]
         getPrestamosByDevolucion(devolucion: String!): [Prestamo]
+        getPrestamo(id: ID!): Prestamo
         getPrestamos: [Prestamo]
 
         #QUERIES DE USUARIOS 
@@ -279,19 +288,7 @@ const typeDefs = gql`
         addItem(input: ItemInput): Item
         updateItem(id: ID!, input: ItemInput): Item
         deleteItem(id: ID!): Alert
-         
-        #Mutations de Herramienta 
-        
-        addHerramienta(input: HerramientaInput): Herramienta
-        updateHerramienta(id: ID!, input: HerramientaInput): Herramienta
-        deleteHerramienta(id: ID!): Alert
-         
-        #Mutations de Material 
-        
-        addMaterial(input: MaterialInput): Material
-        updateMaterial(id: ID!, input: MaterialInput): Material
-        deleteMaterial(id: ID!): Alert
-         
+           
         #MUTATIONS GEOGRAFICOS 
         
          
@@ -319,10 +316,11 @@ const typeDefs = gql`
         updateRegion(id: ID!, input: RegionInput): Region
         deleteRegion(id: ID!): Alert
          
-        #MUTATIONS DE PRESTAMOS 
+        #MUTATIONS DE PRESTAMO 
 
-        addPrestamo(input: PrestamoItemEInput): Prestamo
-        updatePrestamo(id: ID!, input: PrestamoItemEInput): Prestamo
+        addPrestamo(input: PrestamoInput): Prestamo
+        updatePrestamo(id: ID!, input: PrestamoInput): Prestamo
+        returnPrestamo(id: ID!): Prestamo
         deletePrestamo(id: ID!): Alert
          
         #MUTATIONS DE USUARIOS 
