@@ -33,7 +33,7 @@ const usuarioSchema = new mongoose.Schema({
     telefono: { type: String, required: true }, // El teléfono también debería ser obligatorio
 });
 
-const estudianteSchema = new Schema({
+const estudianteSchema = new mongoose.Schema({
     usuario: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },  // Referencia a Usuario
     carrera: { type: Object, required: true },  // Carrera del estudiante
 });
