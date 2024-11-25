@@ -122,11 +122,13 @@ const resolvers = {
                 throw new Error(`Error: Sede: ${error.message}`);
             }
         },
-        async getItemsByComuna (obj, { comuna }) {
+        /*async getItemsByTipoYSede (obj, { tipo, sede }) {
             try{
-                const items = await Item.find({'sede.comuna.nombre': comuna}).populate({
+                let xd = {tipo: tipo, 'sede.nombre': sede}  
+                const items = await Item.find(xd).populate({
                     path: 'sede',
                     populate: {
+                        path: 'nombre',
                         path: 'comuna',
                         populate: {
                             path: 'ciudad',
@@ -134,63 +136,26 @@ const resolvers = {
                         },
                     },
                 });
+                console.log(items)
+                console.log(xd)
                 return items;
             } catch (error) {
-                throw new Error(`Error: Comuna: ${error.message}`);
+                throw new Error(`Error: Tipo y Sede: ${error.message}`);
             }
-        },
-        async getItemsByCiudad (obj, { ciudad }) {
-            try{
-                const items = await Item.find({'sede.comuna.ciudad.nombre': ciudad}).populate({
-                    path: 'sede',
-                    populate: {
-                        path: 'comuna',
-                        populate: {
-                            path: 'ciudad',
-                            populate: 'region', // Anidado hasta región
-                        },
-                    },
-                });
-                return items;
-            } catch (error) {
-                throw new Error(`Error: Ciudad: ${error.message}`);
-            }
-        },
-        async getItemsByRegion (obj, { region }) {
-            try{
-                const regionExist = await Region.findOne({nombre: region});
-                console.log(regionExist);
-                const ciudadExist = await Ciudad.findOne({ 'region': regionExist._id });
-                console.log(ciudadExist);
-                const comunaExist = await Comuna.findOne({ 'ciudad': ciudadExist._id });
-                console.log(comunaExist);
-                const sedeExist = await Sede.findOne({ 'comuna': comunaExist._id });
-                console.log(sedeExist);
-                console.log(region);
-                const item = await Item.find({'sede.comuna.ciudad.region.nombre': region});
-                const items = await Item.find({'sede.comuna.ciudad.region.nombre': region}).populate({
-                    path: 'sede',
-                    populate: {
-                        path: 'comuna',
-                        populate: {
-                            path: 'ciudad',
-                            populate: {
-                                path: 'region',
-                                select: 'nombre'
-                             },
-                        },
-                    },
-                });
-                console.log(items);
-                console.log(item);
-                return items;
-            } catch (error) {
-                throw new Error(`Error: Region: ${error.message}`);
-            }
-        },
+        },*/
         async getItemsByTipoYSede (obj, { tipo, sede }) {
             try{
-                const items = await Item.find({$and: [{tipo: tipo}, {'sede.nombre': sede}]});
+                const items = await Item.find( {tipo: tipo,sede: sede}).populate({
+                    path: 'sede',
+                    populate: {
+                        path: 'nombre',
+                        path: 'comuna',
+                        populate: {
+                            path: 'ciudad',
+                            populate: 'region', // Anidado hasta región
+                        },
+                    },
+                });
                 return items;
             } catch (error) {
                 throw new Error(`Error: Tipo y Sede: ${error.message}`);
