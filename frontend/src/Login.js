@@ -1,66 +1,54 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { mockUsers } from './mockUsers'; // Importa los datos simulados
 
 const Login = () => {
-  const [identifier, setIdentifier] = useState(''); // Puede ser correo o usuario
-  const [password, setPassword] = useState('');
+  const [credenciales, setCredenciales] = useState({ usuario: '', contraseña: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
-
-    // Busca si coincide con usuario o correo
-    const user = mockUsers.find(
+    const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+    const usuarioEncontrado = usuarios.find(
       (user) =>
-        (user.username === identifier || user.email === identifier) &&
-        user.password === password
-    );    
+        user.correo === credenciales.usuario &&
+        user.contraseña === credenciales.contraseña
+    );
     
-    console.log('Identifier:', identifier);
-    console.log('Password:', password);
-    console.log('User found:', user);
-    
+    console.log(usuarios);
 
-    if (user) {
-      // Simula el almacenamiento de un token
-      localStorage.setItem('token', 'mock-token');
-      localStorage.setItem('userRole', user.role);
+    if (usuarioEncontrado) {
+      // Almacenar el token y el rol en el localStorage
+      localStorage.setItem('token', JSON.stringify({ rut: usuarioEncontrado.rut }));
+      localStorage.setItem('rol', usuarioEncontrado.rol); // Almacenar el rol del usuario
+
+      // Redirigir a la página de Dashboard
       navigate('/dashboard');
-      console.log('User token:', localStorage.getItem('token'));
     } else {
-      setError('Usuario/Correo o contraseña incorrectos');
+      setError('Usuario o contraseña incorrectos');
     }
   };
 
   return (
-    <div className="container mt-5">
-      <h2 className="text-center mb-4">Iniciar Sesión</h2>
-      <form onSubmit={handleLogin}>
-        <div className="mb-3">
-          <label htmlFor="identifier" className="form-label">Usuario o Correo</label>
-          <input
-            type="text"
-            id="identifier"
-            className="form-control"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="password" className="form-label">Contraseña</label>
-          <input
-            type="password"
-            id="password"
-            className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        {error && <div className="text-danger mb-3">{error}</div>}
-        <button type="submit" className="btn btn-primary w-100">Entrar</button>
+    <div>
+      <h1>Iniciar Sesión</h1>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Correo"
+          value={credenciales.usuario}
+          onChange={(e) => setCredenciales({ ...credenciales, usuario: e.target.value })}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Contraseña"
+          value={credenciales.contraseña}
+          onChange={(e) => setCredenciales({ ...credenciales, contraseña: e.target.value })}
+          required
+        />
+        <button type="submit">Ingresar</button>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
       </form>
     </div>
   );
