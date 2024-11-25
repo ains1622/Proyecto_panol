@@ -19,7 +19,7 @@ const typeDefs = gql`
         codigo: Int!
         cantidad: Int!
         tipo: String!
-        sede: Sede!
+        sede: Sede
     }
       
     #Definicion de input para Item
