@@ -6,23 +6,25 @@ const regionSchema = new mongoose.Schema({
 });
 const ciudadSchema = new mongoose.Schema({
     nombre: String,
-    region: regionSchema
+    region: { type: Schema.Types.ObjectId, ref: 'Region' } // Cambiado a ObjectId
 });
+
 const comunaSchema = new mongoose.Schema({
     nombre: String,
-    ciudad: ciudadSchema
+    ciudad: { type: Schema.Types.ObjectId, ref: 'Ciudad' } // Cambiado a ObjectId
 });
 
 const sedeSchema = new mongoose.Schema({
     nombre: String,
     direccion: String,
-    comuna: comunaSchema
+    comuna: { type: Schema.Types.ObjectId, ref: 'Comuna' } // Cambiado a ObjectId
 });
+
 
 const carreraSchema = new mongoose.Schema({
     nombre: String,
     escuela: String,
-    sede: sedeSchema
+    sede: { type: mongoose.Schema.Types.ObjectId, ref: 'Sede', required: true }
 });
 
 // A quien se le presta
@@ -34,8 +36,8 @@ const usuarioSchema = new mongoose.Schema({
 });
 
 const estudianteSchema = new mongoose.Schema({
-    usuario: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },  // Referencia a Usuario
-    carrera: { type: Object, required: true },  // Carrera del estudiante
+    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },  // Referencia a Usuario
+    carrera: { type: mongoose.Schema.Types.ObjectId, ref: 'Carrera', required: true }  // Carrera del estudiante
 });
 const docenteSchema = new mongoose.Schema({
     ramo: String,
@@ -50,19 +52,16 @@ const itemSchema = new mongoose.Schema({
     codigo: Number,
     cantidad: Number,
     tipo: {type: String, enum: ['Equipo', 'Herramienta', 'Material']},
-    sede: sedeSchema
+    sede: { type: mongoose.Schema.Types.ObjectId, ref: 'Sede', required: true }
 });
 // Prestamos a usuarios de pañol
 const prestamoSchema = new mongoose.Schema({
     cantidad: Number,
     fecha: String,
     devolucion: String,
-    entidad: {
-        tipo :{type: String, enum: ['Estudiante', 'Docente']},
-        referencia:{ type: Schema.Types.ObjectId, refPath: 'entidad.tipo'}
-    },
-    item: itemSchema,
-    sede: sedeSchema
+    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' },
+    item: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', required: true },
+    sede: { type: mongoose.Schema.Types.ObjectId, ref: 'Sede', required: true }
 });
 
 // Usuarios de pañol

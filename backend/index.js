@@ -59,6 +59,97 @@ app.post('/api/estudiantes', async (req, res) => {
     }
 });
 
+app.post('/api/docentes', async (req, res) => {
+  try {
+    const { usuario, ramo, escuela, sede } = req.body;
+
+    // Validación básica
+    if (!usuario || !ramo || !escuela || !sede) {
+      return res.status(400).json({ error: 'Faltan datos requeridos' });
+    }
+
+    // Crear el nuevo docente
+    const nuevoDocente = new Docente({
+      usuario,
+      ramo,
+      escuela,
+      sede,
+    });
+
+    await nuevoDocente.save();
+    res.status(201).json(nuevoDocente); // Responder con el docente recién creado
+  } catch (error) {
+    console.error('Error al agregar el docente:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+
+app.post('/api/items', async (req, res) => {
+  try {
+    const { nombre, codigo, cantidad, tipo, sede } = req.body;
+
+    // Validación básica
+    if (!nombre || !codigo || !cantidad || !tipo || !sede) {
+      return res.status(400).json({ error: 'Faltan datos requeridos' });
+    }
+
+    // Crear el nuevo item
+    const nuevoItem = new Item({
+      nombre,
+      codigo,
+      cantidad,
+      tipo,
+      sede
+    });
+
+    await nuevoItem.save();
+    res.status(201).json(nuevoItem); // Responder con el item recién creado
+  } catch (error) {
+    console.error('Error al agregar el item:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+app.post('/api/prestamos', async (req, res) => {
+  try {
+    const { cantidad, fecha, devolucion, entidad, item, sede } = req.body;
+
+    // Validación básica
+    if (!cantidad || !fecha || !devolucion || !entidad || !item || !sede) {
+      return res.status(400).json({ error: 'Faltan datos requeridos' });
+    }
+
+    // Crear el nuevo préstamo
+    const nuevoPrestamo = new Prestamo({
+      cantidad,
+      fecha,
+      devolucion,
+      entidad,
+      item,
+      sede,
+    });
+
+    await nuevoPrestamo.save();
+    res.status(201).json(nuevoPrestamo); // Responder con el préstamo recién creado
+  } catch (error) {
+    console.error('Error al agregar el préstamo:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+app.get('/api/estudiantes', async (req, res) => {
+  try {
+    // Usa populate para obtener los detalles completos del usuario en vez de solo el ID
+    const estudiantes = await Estudiante.find().populate('usuario'); // 'usuario' es el campo que hace referencia al modelo 'Usuario'
+    res.status(200).json(estudiantes); // Devuelve los estudiantes con los datos completos del usuario
+  } catch (error) {
+    console.error('Error al obtener estudiantes:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+
 async function startServer(){
     const apolloServer = new ApolloServer({ typeDefs, resolvers, corsOptions });
     await apolloServer.start();

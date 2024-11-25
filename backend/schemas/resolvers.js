@@ -469,26 +469,39 @@ const resolvers = {
     },
     Mutation: {
         // Mutations de objetos
-        async addItem(obj, { input }) {
+        async addItem (parent, { input }){
             try{
-                if (input.cantidad <= 0) {
-                    throw new Error('La cantidad debe ser mayor a 0');
-                }
-
-                const itemExistente = await Item.findOne({ codigo: input.codigo });
-                if (itemExistente) {
-                    itemExistente.cantidad += input.cantidad;
-                    await itemExistente.save();
-                    return itemExistente;
-                }
-
-                const item = new Item(input);
-                await item.save();
-                return item;
+                const { nombre, codigo, cantidad, tipo, sede } = input;
+        
+                // Crear el nuevo item
+                const newItem = new Item({
+                nombre,
+                codigo,
+                cantidad,
+                tipo,
+                sede,
+                });
+        
+                // Guardar en la base de datos
+                const savedItem = await newItem.save();
+        
+                // Usar populate para obtener toda la información relacionada
+                const populatedItem = await Item.findById(savedItem.id).populate({
+                path: 'sede',
+                populate: {
+                    path: 'comuna',
+                    populate: {
+                    path: 'ciudad',
+                    populate: 'region', // Anidado hasta región
+                    },
+                },
+                });
+        
+                return populatedItem;
             } catch (error) {
                 throw new Error(`Error al agregar el item: ${error.message}`);
             }
-        },
+          },
         async updateItem(obj, { id, input }) {
             try{
                 const item = await Item.findByIdAndUpdate(id, input, { new: true });
@@ -610,43 +623,31 @@ const resolvers = {
         // Mutations de Prestamos
         async addPrestamo(parent, { input }) {
             try {
-                const { cantidad, fecha, devolucion, entidad, item, sede } = input;
-        
-                // Validar la cantidad
-                if (cantidad <= 0) {
-                    throw new Error("La cantidad debe ser mayor a 0.");
-                }
-        
-                // Validar fechas
-                if (new Date(devolucion) <= new Date(fecha)) {
-                    throw new Error("La fecha de devolución debe ser posterior a la fecha de préstamo.");
-                }
-        
-                // Verificar si el ítem existe y tiene cantidad suficiente
-                const itemExistente = await Item.findById(item);
-                if (!itemExistente) {
-                    throw new Error("El ítem especificado no existe.");
-                }
-                if (itemExistente.cantidad < cantidad) {
-                    throw new Error("No hay suficiente cantidad disponible del ítem.");
-                }
-        
-                // Reducir la cantidad disponible del ítem
-                itemExistente.cantidad -= cantidad;
-                await itemExistente.save();
-        
-                // Crear el nuevo préstamo
-                const nuevoPrestamo = new Prestamo({
-                    cantidad,
-                    fecha,
-                    devolucion,
-                    entidad,
-                    item,
-                    sede,
+                // Crear el préstamo
+                const prestamo = new Prestamo({
+                    item: input.item,
+                    cantidad: input.cantidad,
+                    fecha: input.fecha,
+                    devolucion: input.devolucion,
+                    usuario: input.usuario,
+                    sede: input.sede,
                 });
         
-                await nuevoPrestamo.save();
-                return nuevoPrestamo;
+                await prestamo.save();
+        
+                // Buscar el préstamo por ID y hacer el populate de estudiante y equipo
+                const prestamoConDatos = await Prestamo.findById(prestamo._id)
+                    .populate('usuario')  // Poblamos el campo estudiante
+                    .populate('item')    // Poblamos el campo equipo
+                    .populate('sede');     // Poblamos el campo sede
+
+                // Convertir los ObjectId a cadenas si es necesario (GraphQL maneja bien los ObjectId como IDs)
+                prestamoConDatos.id = prestamoConDatos._id.toString();
+                prestamoConDatos.usuario.id = prestamoConDatos.usuario._id.toString();
+                prestamoConDatos.item.id = prestamoConDatos.item._id.toString();
+                prestamoConDatos.sede.id = prestamoConDatos.sede._id.toString();
+        
+                return prestamoConDatos;
             } catch (error) {
                 throw new Error(`Error al agregar el préstamo: ${error.message}`);
             }
@@ -742,15 +743,20 @@ const resolvers = {
         // Mutations de Usuarios
         async addEstudiante(parent, { input }) {
             try {
-                const usuario = new Usuario(input.usuario);
-                await usuario.save(); 
-
-                const estudiante = new Estudiante({ ...input, usuario: usuario._id });
+                // Verifica que el ID del usuario exista en la colección de usuarios
+                const usuarioExistente = await Usuario.findById(input.usuario);
+                if (!usuarioExistente) {
+                    throw new Error('El usuario proporcionado no existe.');
+                }
+        
+                // Crea el estudiante, asociando el ID del usuario proporcionado
+                const estudiante = new Estudiante({ ...input, usuario: input.usuario });
                 await estudiante.save();
-                
-                const estudianteConUsuario = await Estudiante.findById(estudiante._id).populate('usuario');
+        
+                // Devuelve el estudiante con los datos del usuario populados
+                const estudianteConUsuario = await Estudiante.findById(estudiante._id).populate('usuario').populate('carrera');
                 return estudianteConUsuario;
-
+        
             } catch (error) {
                 throw new Error(`Error al agregar el estudiante: ${error.message}`);
             }
@@ -803,6 +809,33 @@ const resolvers = {
             }
         },
         
+        async addUsuario(parent, { input }) {
+            try{
+            const usuario = new Usuario(input);
+            await usuario.save();
+            return usuario;
+            } catch (error) {
+                throw new Error(`Error al agregar el usuario: ${error.message}`);
+            }
+        },
+        async updateUsuario(parent, { id, input }) {
+            try{
+            const usuario = await Usuario.findByIdAndUpdate(id, input, { new: true });
+            return usuario;
+            } catch (error) {
+                throw new Error(`Error al actualizar el usuario: ${error.message}`);
+            }
+        },
+
+        async deleteUsuario(parent, { id }) {
+            try{
+            await Usuario.findByIdAndDelete(id);
+            return { message: 'Usuario eliminado' };
+            } catch (error) {
+                throw new Error(`Error al eliminar el usuario: ${error.message}`);
+            }
+        },
+
         // Mutations de Carreras
         async addCarrera(obj, { input }) {
             try{

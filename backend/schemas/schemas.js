@@ -29,7 +29,7 @@ const typeDefs = gql`
         codigo: Int!
         cantidad: Int!
         tipo: String!
-        sede: SedeInput!
+        sede: ID!
     }
     #DEFINICIONES GEOGRAFICAS
      
@@ -44,7 +44,7 @@ const typeDefs = gql`
     input SedeInput {
         nombre: String!
         direccion: String!
-        comuna: ComunaInput!
+        comuna: ID!
     }
      
     #Comuna 
@@ -56,7 +56,7 @@ const typeDefs = gql`
     }
     input ComunaInput {
         nombre: String!
-        ciudad: CiudadInput!
+        ciudad: ID!
     }
      
     #Ciudad  
@@ -68,7 +68,7 @@ const typeDefs = gql`
     }
     input CiudadInput {
         nombre: String!
-        region: RegionInput!
+        region: ID!
     }
       
     #Region 
@@ -89,7 +89,7 @@ const typeDefs = gql`
         cantidad: Int!
         fecha: String!
         devolucion: String!
-        entidad: Entidad!
+        usuario: Usuario!
         item: Item!
         sede: Sede!
     }
@@ -100,24 +100,13 @@ const typeDefs = gql`
         cantidad: Int!
         fecha: String!
         devolucion: String!
-        entidad: EntidadInput!
+        usuario: ID!
         item: ID!
         sede: ID!
     }
     #DEFINICIONES DE USUARIOS
     
     #Definicion de Usuario
-    
-    type Entidad{
-        tipo: String!
-        referencia: ID!
-    }
-
-    input EntidadInput{
-        tipo: String!
-        referencia: ID!
-    }
-
     type  Usuario {
         id: ID!
         nombre: String!
@@ -146,8 +135,8 @@ const typeDefs = gql`
     #Definicion de input para Estudiante
     
     input EstudianteInput {
-        usuario: UsuarioInput!
-        carrera: CarreraInput!
+        usuario: ID!
+        carrera: ID!
     }
     
     #Definicion de Docente
@@ -163,8 +152,8 @@ const typeDefs = gql`
     #Definicion de input para Docente
     
     input DocenteInput {
-        usuario: UsuarioInput!
-        sede: SedeInput!
+        usuario: ID!
+        sede: ID!
         escuela: String!
         ramo: String!
     }
@@ -186,7 +175,7 @@ const typeDefs = gql`
     input CarreraInput {
         nombre: String!
         escuela: String!
-        sede: SedeInput!
+        sede: ID!
     }
 
     union UsuariosUnion = Estudiante | Docente
@@ -336,7 +325,13 @@ const typeDefs = gql`
         addDocente(input: DocenteInput): Docente
         updateDocente(id: ID!, input: DocenteInput): Docente
         deleteDocente(id: ID!): Alert
-         
+        
+        #Mutations de Usuario
+
+        addUsuario(input: UsuarioInput): Usuario
+        updateUsuario(id: ID!, input: UsuarioInput): Usuario
+        deleteUsuario(id: ID!): Alert
+
         #Mutations de Carrera 
         
         addCarrera(input: CarreraInput): Carrera
