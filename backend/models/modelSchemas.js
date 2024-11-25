@@ -32,6 +32,7 @@ const usuarioSchema = new mongoose.Schema({
     nombre: { type: String, required: true },  // Asegúrate de que el nombre sea obligatorio
     rut: { type: String, required: true },     // El rut también es obligatorio
     email: { type: String, required: true },   // Asegúrate de que el email sea obligatorio
+    contrasena: String,
     telefono: { type: String, required: true }, // El teléfono también debería ser obligatorio
 });
 

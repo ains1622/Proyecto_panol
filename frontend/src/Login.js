@@ -1,31 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Login = () => {
-  const [credenciales, setCredenciales] = useState({ usuario: '', contraseña: '' });
+  const [credenciales, setCredenciales] = useState({ email: '', contrasena: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
-    const usuarioEncontrado = usuarios.find(
-      (user) =>
-        user.correo === credenciales.usuario &&
-        user.contraseña === credenciales.contraseña
-    );
-    
-    console.log(usuarios);
-
-    if (usuarioEncontrado) {
-      // Almacenar el token y el rol en el localStorage
-      localStorage.setItem('token', JSON.stringify({ rut: usuarioEncontrado.rut }));
-      localStorage.setItem('rol', usuarioEncontrado.rol); // Almacenar el rol del usuario
-
-      // Redirigir a la página de Dashboard
+    console.log('Enviando credenciales:', credenciales);
+    try {
+      const response = await axios.post('http://localhost:5000/api/login', credenciales);
+      localStorage.setItem('token', response.data.token);
       navigate('/dashboard');
-    } else {
-      setError('Usuario o contraseña incorrectos');
+    } catch (error) {
+      setError(error.response.data.error);
     }
   };
 
@@ -36,15 +26,15 @@ const Login = () => {
         <input
           type="text"
           placeholder="Correo"
-          value={credenciales.usuario}
-          onChange={(e) => setCredenciales({ ...credenciales, usuario: e.target.value })}
+          value={credenciales.email}
+          onChange={(e) => setCredenciales({ ...credenciales, email: e.target.value })}
           required
         />
         <input
           type="password"
           placeholder="Contraseña"
-          value={credenciales.contraseña}
-          onChange={(e) => setCredenciales({ ...credenciales, contraseña: e.target.value })}
+          value={credenciales.contrasena}
+          onChange={(e) => setCredenciales({ ...credenciales, contrasena: e.target.value })}
           required
         />
         <button type="submit">Ingresar</button>

@@ -112,6 +112,7 @@ const typeDefs = gql`
         nombre: String!
         rut: String!
         email: String!
+        contrasena: String!
         telefono: String!
     }
     
@@ -121,6 +122,7 @@ const typeDefs = gql`
         nombre: String!
         rut: String!
         email: String!
+        contrasena: String!
         telefono: String!
     }
     

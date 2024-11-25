@@ -122,27 +122,6 @@ const resolvers = {
                 throw new Error(`Error: Sede: ${error.message}`);
             }
         },
-        /*async getItemsByTipoYSede (obj, { tipo, sede }) {
-            try{
-                let xd = {tipo: tipo, 'sede.nombre': sede}  
-                const items = await Item.find(xd).populate({
-                    path: 'sede',
-                    populate: {
-                        path: 'nombre',
-                        path: 'comuna',
-                        populate: {
-                            path: 'ciudad',
-                            populate: 'region', // Anidado hasta región
-                        },
-                    },
-                });
-                console.log(items)
-                console.log(xd)
-                return items;
-            } catch (error) {
-                throw new Error(`Error: Tipo y Sede: ${error.message}`);
-            }
-        },*/
         async getItemsByTipoYSede (obj, { tipo, sede }) {
             try{
                 const items = await Item.find( {tipo: tipo,sede: sede}).populate({

@@ -23,36 +23,37 @@ mongoose.connect(process.env.MONGO_URI)
 let apolloServer = null;
 
 const corsOptions = {
-    origin: "http://localhost:8080",
+    origin: "http://localhost:5000",
     credentials: false
 };
 
 const app = express();
 app.use(cors(), bodyParser.json());
 
-app.post('/api/estudiantes', async (req, res) => {
+app.post('/api/login', async (req, res) => {
     try {
-      const { usuario, carrera } = req.body;
-  
+      console.log('Recibiendo credenciales:', req.body);
+      const { email, contrasena } = req.body;
+      console.log('Email:', email);
+      console.log('Contrasena:', contrasena);
+
       // Valida los datos recibidos
-      if (!usuario || !carrera) {
-        return res.status(400).json({ error: 'Faltan datos requeridos' });
+      if (!email || !contrasena) {
+        return res.status(400).json({ error: 'Los 2 parametros son necesarios' });
       }
   
-      const nuevoUsuario = new Usuario(usuario);
-      await nuevoUsuario.save();
+      const emailUsuario = new Usuario.find({'usuario.email': email});
+      if (!emailUsuario) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+      const contrasenaUsuario = new Usuario.find({'usuario.contrasena': contrasena});
+      if (!contrasenaUsuario) {
+        return res.status(401).json({ error: 'Contrasena incorrecta' });
+      }
 
-      // Crea un nuevo estudiante con los datos recibidos
-      const nuevoEstudiante = new Estudiante({
-        usuario: nuevoUsuario._id,
-        carrera: carrera
-      });
-  
-      // Guarda el estudiante en la base de datos
-      await nuevoEstudiante.save();
-  
+      const token = 'tu_token_aqui'; // Generar un token JWT o similar
+      res.json({ token });
       // Envía una respuesta de éxito
-      res.status(201).json(nuevoEstudiante);
     } catch (error) {
       console.error('Error al agregar estudiante:', error);
       res.status(500).json({ error: 'Error al agregar estudiante' });
@@ -137,18 +138,6 @@ app.post('/api/prestamos', async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
-
-app.get('/api/estudiantes', async (req, res) => {
-  try {
-    // Usa populate para obtener los detalles completos del usuario en vez de solo el ID
-    const estudiantes = await Estudiante.find().populate('usuario'); // 'usuario' es el campo que hace referencia al modelo 'Usuario'
-    res.status(200).json(estudiantes); // Devuelve los estudiantes con los datos completos del usuario
-  } catch (error) {
-    console.error('Error al obtener estudiantes:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
-
 
 async function startServer(){
     const apolloServer = new ApolloServer({ typeDefs, resolvers, corsOptions });
