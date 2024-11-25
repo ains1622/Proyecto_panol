@@ -19,7 +19,7 @@ const typeDefs = gql`
         codigo: Int!
         cantidad: Int!
         tipo: String!
-        sede: Sede!
+        sede: Sede
     }
       
     #Definicion de input para Item
@@ -189,10 +189,7 @@ const typeDefs = gql`
         getItemsByTipo(tipo: String!): [Item]
         getItemById(id: ID!): Item
         getItemsBySede(sede: String!): [Item]
-        getItemsByComuna(comuna: String!): [Item]
-        getItemsByCiudad(ciudad: String!): [Item]
-        getItemsByRegion(region: String!): [Item]
-        getItemsByTipoYSede(tipo: String!, sede: String!): [Item]
+        getItemsByTipoYSede(tipo: String!, sede: String!): [Item!]!
         getItemsByTipoYComuna(tipo: String!, comuna: String!): [Item]
         getItemsByTipoYCiudad(tipo: String!, ciudad: String!): [Item]
         getItemsByTipoYRegion(tipo: String!, region: String!): [Item]

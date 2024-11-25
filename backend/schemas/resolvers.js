@@ -22,7 +22,16 @@ const resolvers = {
         // Querys de Items
         async getItems (obj) {
             try{
-                const items = await Item.find();
+                const items = await Item.find().populate({
+                    path: 'sede',
+                    populate: {
+                        path: 'comuna',
+                        populate: {
+                            path: 'ciudad',
+                            populate: 'region', // Anidado hasta región
+                        },
+                    },
+                });
                 return items;
             } catch (error) {
                 throw new Error(`Error: Items no encontrados: ${error.message}`);
@@ -30,7 +39,16 @@ const resolvers = {
         },
         async getItem (obj, { id }) {
             try{
-                const item = await Item.findById(id);
+                const item = await Item.findById(id).populate({
+                    path: 'sede',
+                    populate: {
+                        path: 'comuna',
+                        populate: {
+                            path: 'ciudad',
+                            populate: 'region', // Anidado hasta región
+                        },
+                    },
+                });
                 return item;
             } catch (error) {
                 throw new Error(`Error: Item no encontrado: ${error.message}`);
@@ -38,7 +56,16 @@ const resolvers = {
         },
         async getItemsByNombre (obj, { nombre }) {
             try{
-                const items = await Item.find({nombre: nombre});
+                const items = await Item.find({nombre: nombre}).populate({
+                    path: 'sede',
+                    populate: {
+                        path: 'comuna',
+                        populate: {
+                            path: 'ciudad',
+                            populate: 'region', // Anidado hasta región
+                        },
+                    },
+                });
                 return items;
             } catch (error) {
                 throw new Error(`Error: Nombre: ${error.message}`);
@@ -46,7 +73,16 @@ const resolvers = {
         },
         async getItemByCodigo (obj, { codigo }) {
             try{
-                const items = await Item.find({codigo: codigo});
+                const items = await Item.find({codigo: codigo}).populate({
+                    path: 'sede',
+                    populate: {
+                        path: 'comuna',
+                        populate: {
+                            path: 'ciudad',
+                            populate: 'region', // Anidado hasta región
+                        },
+                    },
+                });
                 return items;
             } catch (error) {
                 throw new Error(`Error: Codigo: ${error.message}`);
@@ -54,7 +90,16 @@ const resolvers = {
         },
         async getItemsByTipo (obj, { tipo }) {
             try{
-                const items = await Item.find({tipo: tipo});
+                const items = await Item.find({tipo: tipo}).populate({
+                    path: 'sede',
+                    populate: {
+                        path: 'comuna',
+                        populate: {
+                            path: 'ciudad',
+                            populate: 'region', // Anidado hasta región
+                        },
+                    },
+                });
                 return items;
             } catch (error) {
                 throw new Error(`Error: Tipo: ${error.message}`);
@@ -62,39 +107,55 @@ const resolvers = {
         },
         async getItemsBySede (obj, { sede }) {
             try{
-                const items = await Item.find({'sede.nombre': sede});
+                const items = await Item.find({'sede.nombre': sede}).populate({
+                    path: 'sede',
+                    populate: {
+                        path: 'comuna',
+                        populate: {
+                            path: 'ciudad',
+                            populate: 'region', // Anidado hasta región
+                        },
+                    },
+                });
                 return items;
             } catch (error) {
                 throw new Error(`Error: Sede: ${error.message}`);
             }
         },
-        async getItemsByComuna (obj, { comuna }) {
+        /*async getItemsByTipoYSede (obj, { tipo, sede }) {
             try{
-                const items = await Item.find({'sede.comuna.nombre': comuna});
+                let xd = {tipo: tipo, 'sede.nombre': sede}  
+                const items = await Item.find(xd).populate({
+                    path: 'sede',
+                    populate: {
+                        path: 'nombre',
+                        path: 'comuna',
+                        populate: {
+                            path: 'ciudad',
+                            populate: 'region', // Anidado hasta región
+                        },
+                    },
+                });
+                console.log(items)
+                console.log(xd)
                 return items;
             } catch (error) {
-                throw new Error(`Error: Comuna: ${error.message}`);
+                throw new Error(`Error: Tipo y Sede: ${error.message}`);
             }
-        },
-        async getItemsByCiudad (obj, { ciudad }) {
-            try{
-                const items = await Item.find({'sede.comuna.ciudad.nombre': ciudad});
-                return items;
-            } catch (error) {
-                throw new Error(`Error: Ciudad: ${error.message}`);
-            }
-        },
-        async getItemsByRegion (obj, { region }) {
-            try{
-                const items = await Item.find({'sede.comuna.ciudad.region.nombre': region});
-                return items;
-            } catch (error) {
-                throw new Error(`Error: Region: ${error.message}`);
-            }
-        },
+        },*/
         async getItemsByTipoYSede (obj, { tipo, sede }) {
             try{
-                const items = await Item.find({$and: [{tipo: tipo}, {'sede.nombre': sede}]});
+                const items = await Item.find( {tipo: tipo,sede: sede}).populate({
+                    path: 'sede',
+                    populate: {
+                        path: 'nombre',
+                        path: 'comuna',
+                        populate: {
+                            path: 'ciudad',
+                            populate: 'region', // Anidado hasta región
+                        },
+                    },
+                });
                 return items;
             } catch (error) {
                 throw new Error(`Error: Tipo y Sede: ${error.message}`);

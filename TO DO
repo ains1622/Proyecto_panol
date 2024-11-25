@@ -7,7 +7,7 @@ Para el front end se necesita que:
     -Distribucion de simetria
     -Ritmo grafico
 Para el back end se necesita que:
-    -Diagrama de clases *EN PROCESO*
+    -Diagrama de clases *Logrado*
     -API escalable
     -Definicion generica  **No repetir codigo, hacer definiciones genericas para usar mas de una vez** *Logrado*
     -Definicion generica de metodos
