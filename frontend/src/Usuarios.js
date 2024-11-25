@@ -7,12 +7,13 @@ const UserManagement = ({ userRole }) => {
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
   const [accion, setAccion] = useState(''); // Puede ser 'agregarUsuario', 'cambiarContraseña' o 'editarPerfil'
   const [mensajeExito, setMensajeExito] = useState('');
+  console.log('El user role es:', userRole);
 
   useEffect(() => {
     const mockUsuarios = [
-      { id: 1, rut: '12345678-9', apellido1: 'Pérez', apellido2: 'Gómez', nombre1: 'Admin', carrera: '', telefono: '', email: 'admin@domain.com', rol: 'SuperAdmin' },
-      { id: 2, rut: '87654321-0', apellido1: 'López', apellido2: 'Martínez', nombre1: 'Juan', carrera: 'Ingeniería', telefono: '987654321', email: 'juan@domain.com', rol: 'Alumno' },
-      { id: 3, rut: '11223344-5', apellido1: 'Rodríguez', apellido2: 'Hernández', nombre1: 'María', carrera: 'Arquitectura', telefono: '123456789', email: 'maria@domain.com', rol: 'Docente' },
+      { id: 1, rut: '12345678-9', apellido1: 'Pérez', apellido2: 'Gómez', nombre1: 'Admin', carrera: '', telefono: '', email: 'admin@domain.com', rol: 'SuperAdmin', constraseña: 'admin123' },
+      { id: 2, rut: '87654321-0', apellido1: 'López', apellido2: 'Martínez', nombre1: 'Juan', carrera: 'Ingeniería', telefono: '987654321', email: 'juan@domain.com', rol: 'Alumno', contraseña: 'juan123' },
+      { id: 3, rut: '11223344-5', apellido1: 'Rodríguez', apellido2: 'Hernández', nombre1: 'María', carrera: 'Arquitectura', telefono: '123456789', email: 'maria@domain.com', rol: 'Docente', contraseña: 'maria123' },
     ];
     setUsuarios(mockUsuarios);
   }, []);
@@ -111,7 +112,7 @@ const UserManagement = ({ userRole }) => {
                   <Form>
                     <div className="row">
                       <div className="col-12 col-md-6 mb-3">
-                        <label htmlFor="rut" className="form-label">RUT</label>
+                        <label htmlFor="rut" className="form-label">RUT (Sin puntos ni guión)</label>
                         <Field type="text" id="rut" name="rut" className="form-control" />
                         <ErrorMessage name="rut" component="div" className="text-danger" />
                       </div>
