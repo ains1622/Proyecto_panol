@@ -114,6 +114,7 @@ const typeDefs = gql`
         email: String!
         contrasena: String!
         telefono: String!
+        rol: String!
     }
     
     #Definicion de input para Usuario
@@ -124,40 +125,22 @@ const typeDefs = gql`
         email: String!
         contrasena: String!
         telefono: String!
+        rol: String!
     }
     
-    #Definicion de Estudiante
+    #Definicion de UsuarioF
     
-    type Estudiante {
+    type UsuarioF {
         id: ID!
         usuario: Usuario!
         carrera: Carrera!
     }
     
-    #Definicion de input para Estudiante
+    #Definicion de input para UsuarioF
     
-    input EstudianteInput {
+    input UsuarioFInput {
         usuario: ID!
         carrera: ID!
-    }
-    
-    #Definicion de Docente
-    
-    type Docente {
-        id: ID!
-        usuario: Usuario!
-        sede: Sede!
-        escuela: String!
-        ramo: String!
-    }
-    
-    #Definicion de input para Docente
-    
-    input DocenteInput {
-        usuario: ID!
-        sede: ID!
-        escuela: String!
-        ramo: String!
     }
     
     #DEFINICIONES DE CARRERAS
@@ -179,8 +162,6 @@ const typeDefs = gql`
         escuela: String!
         sede: ID!
     }
-
-    union UsuariosUnion = Estudiante | Docente
 
     type Query{
          
@@ -238,29 +219,20 @@ const typeDefs = gql`
 
         #QUERIES DE USUARIOS 
         
-        #Queries de Estudiante 
+        #Queries de UsuarioF 
         
-        getEstudiantes: [Estudiante]
-        getEstudiante(id: ID!): Estudiante
-        getEstudiantesByCarrera(carrera: String!): [Estudiante]
-        getEstudiantesByNombre(nombre: String!): [Estudiante]
-        getEstudianteByRut(rut: String!): Estudiante
-         
-        #Queries de Docente 
-        
-        getDocentes: [Docente]
-        getDocente(id: ID!): Docente
-        getDocentesByEscuela(escuela: String!): [Docente]
-        getDocentesByNombre(nombre: String!): [Docente]
-        getDocentesByRamo(ramo: String!): [Docente]
-        getDocenteByRut(rut: String!): Docente
+        getUsuarioFs: [UsuarioF]
+        getUsuarioF(id: ID!): UsuarioF
+        getUsuarioFsByCarrera(carrera: String!): [UsuarioF]
+        getUsuarioFsByNombre(nombre: String!): [UsuarioF]
+        getUsuarioFByRut(rut: String!): UsuarioF
          
         #Queries de usuarios
         
-        getUsuarios: [UsuariosUnion]
-        getUsuario(id: ID!): UsuariosUnion
-        getUsuariosByNombre(nombre: String!): [UsuariosUnion]
-        getUsuariosBySede(sede: String!): [UsuariosUnion]
+        getUsuarios: [Usuario]
+        getUsuario(id: ID!): Usuario
+        getUsuariosByNombre(nombre: String!): [Usuario]
+        getUsuariosBySede(sede: String!): [Usuario]
          
         #QUERIES DE CARRERA
         
@@ -313,18 +285,12 @@ const typeDefs = gql`
          
         #MUTATIONS DE USUARIOS 
 
-        #Mutations de Estudiante 
+        #Mutations de UsuarioF 
         
-        addEstudiante(input: EstudianteInput): Estudiante
-        updateEstudiante(id: ID!, input: EstudianteInput): Estudiante
-        deleteEstudiante(id: ID!): Alert
-         
-        #Mutations de Docente 
-        
-        addDocente(input: DocenteInput): Docente
-        updateDocente(id: ID!, input: DocenteInput): Docente
-        deleteDocente(id: ID!): Alert
-        
+        addUsuarioF(input: UsuarioFInput): UsuarioF
+        updateUsuarioF(id: ID!, input: UsuarioFInput): UsuarioF
+        deleteUsuarioF(id: ID!): Alert
+
         #Mutations de Usuario
 
         addUsuario(input: UsuarioInput): Usuario

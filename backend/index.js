@@ -3,125 +3,180 @@ const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const express = require('express');
 const cors = require('cors');
-const{ ApolloServer } = require('apollo-server-express');
-const {Estudiante, Usuario, Docente, Carrera, Sede, Item, Ciudad, Comuna, Region, Prestamo} = require('./models/modelSchemas');
-//const {graphqlExpress, graphqlExpress} = require('graphql-server-express');
-//const{makeExecutableSchema} = require('graphql-tools');
+const { ApolloServer } = require('apollo-server-express');
+const jwt = require('jsonwebtoken');
 
-const { merge } = require('lodash');
+// Importar modelos
+const { Usuario, Carrera, Sede, Item, Ciudad, Comuna, Region, Prestamo } = require('./models/modelSchemas');
 
+// Resolver y tipo de esquemas
 const resolvers = require('./schemas/resolvers');
 const typeDefs = require('./schemas/schemas');
-// Cargar variables de entorno
+
+// Configuración de variables de entorno
 dotenv.config();
 
-// Conectar a MongoDB
-mongoose.connect(process.env.MONGO_URI)
+// Conexión a MongoDB
+mongoose
+  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conexión exitosa con MongoDB Atlas'))
-  .catch(err => console.error('Error al conectar con MongoDB:', err));
+  .catch((err) => console.error('Error al conectar con MongoDB:', err));
 
-let apolloServer = null;
-
+// Opciones de CORS
 const corsOptions = {
-    origin: "http://localhost:5000",
-    credentials: false
+  origin: ["http://localhost:3000", "https://studio.apollographql.com"], // Permitir frontend y Apollo Sandbox
+  credentials: true,
 };
 
+// Configurar express
 const app = express();
-app.use(cors(), bodyParser.json());
+app.use(cors(corsOptions));
+app.use(bodyParser.json());
+app.use(express.json());
 
+// Middleware de autenticación (opcional para proteger rutas)
+function autenticarToken(req, res, next) {
+  const token = req.headers['authorization'];
+  if (!token) return res.status(403).json({ error: 'Acceso denegado. Token requerido.' });
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, usuario) => {
+    if (err) return res.status(403).json({ error: 'Token inválido.' });
+    req.usuario = usuario;
+    next();
+  });
+}
+
+// Rutas de autenticación
 app.post('/api/login', async (req, res) => {
-    try {
-      console.log('Recibiendo credenciales:', req.body);
-      const { email, contrasena } = req.body;
-      console.log('Email:', email);
-      console.log('Contrasena:', contrasena);
+  try {
+    const { email, contrasena } = req.body;
 
-      // Valida los datos recibidos
-      if (!email || !contrasena) {
-        return res.status(400).json({ error: 'Los 2 parametros son necesarios' });
-      }
-  
-      const emailUsuario = new Usuario.find({'usuario.email': email});
-      if (!emailUsuario) {
-        return res.status(404).json({ error: 'Usuario no encontrado' });
-      }
-      const contrasenaUsuario = new Usuario.find({'usuario.contrasena': contrasena});
-      if (!contrasenaUsuario) {
-        return res.status(401).json({ error: 'Contrasena incorrecta' });
-      }
-
-      const token = 'tu_token_aqui'; // Generar un token JWT o similar
-      res.json({ token });
-      // Envía una respuesta de éxito
-    } catch (error) {
-      console.error('Error al agregar estudiante:', error);
-      res.status(500).json({ error: 'Error al agregar estudiante' });
+    if (!email || !contrasena) {
+      return res.status(400).json({ error: 'Email y contraseña son requeridos.' });
     }
+
+    const usuario = await Usuario.findOne({ email });
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
+    }
+
+    // Validar contraseña
+    if (contrasena !== usuario.contrasena) {
+      return res.status(401).json({ error: 'Contraseña incorrecta.' });
+    }
+
+    const token = jwt.sign(
+      { id: usuario._id, rol: usuario.rol },
+      process.env.JWT_SECRET, // Asegúrate de que tenga un valor
+      { expiresIn: '5m' }
+    );
+
+    res.json({ token });
+  } catch (error) {
+    console.error('Error en login:', error);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
 });
 
-app.post('/api/docentes', async (req, res) => {
+// Rutas de usuarios
+app.post('/api/usuarios', async (req, res) => {
   try {
-    const { usuario, ramo, escuela, sede } = req.body;
-
-    // Validación básica
-    if (!usuario || !ramo || !escuela || !sede) {
-      return res.status(400).json({ error: 'Faltan datos requeridos' });
+    const { nombre, rut, email, contrasena, telefono, rol } = req.body;
+    console.log(req.body);
+    if (!nombre || !rut || !email || !contrasena || !telefono || !rol) {
+      return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
     }
 
-    // Crear el nuevo docente
-    const nuevoDocente = new Docente({
-      usuario,
-      ramo,
-      escuela,
-      sede,
+    const nuevoUsuario = new Usuario({
+      nombre,
+      rut,
+      email,
+      contrasena,
+      telefono,
+      rol,
     });
 
-    await nuevoDocente.save();
-    res.status(201).json(nuevoDocente); // Responder con el docente recién creado
+    await nuevoUsuario.save();
+    res.status(201).json(nuevoUsuario);
   } catch (error) {
-    console.error('Error al agregar el docente:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error al agregar usuario:', error);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
+app.get('/api/usuarios', async (req, res) => {
+  try {
+    // Consulta la base de datos para obtener todos los usuarios
+    const usuarios = await Usuario.find();
+
+    // Devuelve la lista de usuarios como JSON
+    res.status(200).json(usuarios);
+  } catch (error) {
+    // Manejo de errores
+    console.error('Error al obtener los usuarios:', error.message);
+    res.status(500).json({ message: 'Error al obtener los usuarios.' });
+  }
+});
+
+app.patch('/api/usuarios/:id', async (req, res) => {
+  const { id } = req.params; // Obtenemos el ID del usuario desde los parámetros de la URL
+  const actualizaciones = req.body; // Obtenemos las actualizaciones desde el body de la solicitud
+
+  try {
+      // Verificamos que el usuario exista y actualizamos solo los campos enviados
+      const usuarioActualizado = await Usuario.findByIdAndUpdate(
+          id, 
+          { $set: actualizaciones }, // Solo actualizamos los campos enviados
+          { new: true, runValidators: true } // Devolvemos el documento actualizado y validamos los datos
+      );
+
+      // Si no se encuentra el usuario, respondemos con un error
+      if (!usuarioActualizado) {
+          return res.status(404).json({ mensaje: 'Usuario no encontrado.' });
+      }
+
+      // Respondemos con el usuario actualizado
+      res.json(usuarioActualizado);
+  } catch (error) {
+      // Manejamos errores
+      res.status(500).json({ mensaje: 'Error al actualizar el usuario.', error: error.message });
   }
 });
 
 
-app.post('/api/items', async (req, res) => {
+// Rutas de Items y Préstamos (sin cambios sustanciales)
+app.post('/api/items', autenticarToken, async (req, res) => {
   try {
     const { nombre, codigo, cantidad, tipo, sede } = req.body;
 
-    // Validación básica
     if (!nombre || !codigo || !cantidad || !tipo || !sede) {
-      return res.status(400).json({ error: 'Faltan datos requeridos' });
+      return res.status(400).json({ error: 'Faltan datos requeridos.' });
     }
 
-    // Crear el nuevo item
     const nuevoItem = new Item({
       nombre,
       codigo,
       cantidad,
       tipo,
-      sede
+      sede,
     });
 
     await nuevoItem.save();
-    res.status(201).json(nuevoItem); // Responder con el item recién creado
+    res.status(201).json(nuevoItem);
   } catch (error) {
-    console.error('Error al agregar el item:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error al agregar item:', error);
+    res.status(500).json({ error: 'Error interno del servidor.' });
   }
 });
 
-app.post('/api/prestamos', async (req, res) => {
+app.post('/api/prestamos', autenticarToken, async (req, res) => {
   try {
     const { cantidad, fecha, devolucion, entidad, item, sede } = req.body;
 
-    // Validación básica
     if (!cantidad || !fecha || !devolucion || !entidad || !item || !sede) {
-      return res.status(400).json({ error: 'Faltan datos requeridos' });
+      return res.status(400).json({ error: 'Faltan datos requeridos.' });
     }
 
-    // Crear el nuevo préstamo
     const nuevoPrestamo = new Prestamo({
       cantidad,
       fecha,
@@ -132,21 +187,39 @@ app.post('/api/prestamos', async (req, res) => {
     });
 
     await nuevoPrestamo.save();
-    res.status(201).json(nuevoPrestamo); // Responder con el préstamo recién creado
+    res.status(201).json(nuevoPrestamo);
   } catch (error) {
-    console.error('Error al agregar el préstamo:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error al agregar préstamo:', error);
+    res.status(500).json({ error: 'Error interno del servidor.' });
   }
 });
 
-async function startServer(){
-    const apolloServer = new ApolloServer({ typeDefs, resolvers, corsOptions });
-    await apolloServer.start();
-    apolloServer.applyMiddleware({ app, cors: false, path: '/graphql' });
-}
+// Configuración de Apollo Server
+async function startServer() {
+  const apolloServer = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: ({ req }) => {
+      const token = req.headers.authorization || '';
+      let usuario = null;
 
+      if (token) {
+        try {
+          usuario = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (error) {
+          console.warn('Token inválido:', error.message);
+        }
+      }
+      return { usuario };
+    },
+  });
+
+  await apolloServer.start();
+  apolloServer.applyMiddleware({ app, path: '/graphql', cors: false });
+}
+module.exports = app;
 startServer();
 
-app.listen(5000, function(){
-    console.log('Servidor iniciado en http://localhost:5000');
+app.listen(5000, () => {
+  console.log('Servidor iniciado en http://localhost:5000');
 });

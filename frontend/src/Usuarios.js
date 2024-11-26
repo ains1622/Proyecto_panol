@@ -1,208 +1,248 @@
 import React, { useState, useEffect } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import axios from 'axios';
 
 const UserManagement = ({ userRole }) => {
   const [usuarios, setUsuarios] = useState([]);
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
-  const [accion, setAccion] = useState(''); // Puede ser 'agregarUsuario', 'cambiarContraseña' o 'editarPerfil'
+  const [accion, setAccion] = useState('');
   const [mensajeExito, setMensajeExito] = useState('');
-  console.log('El user role es:', userRole);
+  const [mensajeError, setMensajeError] = useState('');
 
+  const token = localStorage.getItem('token'); // Token de autenticación
+
+  const axiosInstance = axios.create({
+    baseURL: 'http://localhost:5000/api',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    withCredentials: true,
+  });
+
+  // Obtener usuarios al montar el componente
   useEffect(() => {
-    const mockUsuarios = [
-      { id: 1, rut: '12345678-9', apellido1: 'Pérez', apellido2: 'Gómez', nombre1: 'Admin', carrera: '', telefono: '', email: 'admin@domain.com', rol: 'SuperAdmin', constraseña: 'admin123' },
-      { id: 2, rut: '87654321-0', apellido1: 'López', apellido2: 'Martínez', nombre1: 'Juan', carrera: 'Ingeniería', telefono: '987654321', email: 'juan@domain.com', rol: 'Alumno', contraseña: 'juan123' },
-      { id: 3, rut: '11223344-5', apellido1: 'Rodríguez', apellido2: 'Hernández', nombre1: 'María', carrera: 'Arquitectura', telefono: '123456789', email: 'maria@domain.com', rol: 'Docente', contraseña: 'maria123' },
-    ];
-    setUsuarios(mockUsuarios);
-  }, []);
-
+    const fetchUsuarios = async () => {
+      try {
+        const response = await axiosInstance.get('/usuarios');
+        setUsuarios(response.data);
+        //console.log('id:', response.data[0]._id);
+        //console.log para ver la id del usuario
+      } catch (error) {
+        console.error(error);
+        setMensajeError('Error al obtener los usuarios.');
+      }
+    };
+    fetchUsuarios();
+  }, [axiosInstance]);
+  // Validación del formulario de perfil
   const validationSchemaPerfil = Yup.object({
     rut: Yup.string().required('El RUT es obligatorio'),
-    apellido1: Yup.string().required('El primer apellido es obligatorio'),
-    apellido2: Yup.string(),
-    nombre1: Yup.string().required('El primer nombre es obligatorio'),
+    nombre: Yup.string().required('El nombre completo es obligatorio'),
     carrera: Yup.string(),
     telefono: Yup.string(),
     email: Yup.string().email('Debe ser un correo válido').required('El correo es obligatorio'),
     rol: Yup.string().required('Debe seleccionar un rol'),
+    contrasena: Yup.string(),
   });
 
-  const validationSchemaPassword = Yup.object({
-    passwordActual: Yup.string().when('rol', {
-      is: () => userRole !== 'SuperAdmin',
-      then: Yup.string().required('Debe ingresar su contraseña actual'),
-      otherwise: Yup.string().notRequired(),
-    }),
-    nuevaPassword: Yup.string()
-      .min(6, 'La nueva contraseña debe tener al menos 6 caracteres')
-      .required('Debe ingresar la nueva contraseña'),
-    confirmarPassword: Yup.string()
-      .oneOf([Yup.ref('nuevaPassword'), null], 'Las contraseñas no coinciden')
-      .required('Debe confirmar la nueva contraseña'),
-  });
+  // Enviar datos del formulario de perfil
+  const handlePerfilSubmit = async (values, { resetForm }) => {
+    try {
+      // Si la contraseña está vacía, que sea el rut
+      if (!values.contrasena) {
+        values.contrasena = values.rut;
+      }
+      
+      if (accion === 'agregarUsuario') {
+        await axiosInstance.post('/usuarios', values); // Crear nuevo usuario
+        console.log('Usuario creado:', values);
+      } else {
+        await axiosInstance.put(`/usuarios/${usuarioSeleccionado.id}`, values); // Editar usuario
+      }
 
-  const handlePerfilSubmit = (values, { resetForm }) => {
-    if (accion === 'agregarUsuario') {
-      const nuevoUsuario = { ...values, id: Date.now() }; // ID simulado
-      setUsuarios((prev) => [...prev, nuevoUsuario]);
-    } else {
-      setUsuarios((prev) =>
-        prev.map((u) => (u.id === usuarioSeleccionado.id ? { ...u, ...values } : u))
-      );
+      const response = await axiosInstance.get('/usuarios'); // Recargar lista de usuarios
+      setUsuarios(response.data);
+
+      setMensajeExito('¡Acción realizada correctamente!');
+      resetForm();
+      setAccion('');
+      setUsuarioSeleccionado(null);
+    } catch (error) {
+      setMensajeError('Error al guardar los datos.');
     }
-
-    setMensajeExito('¡Acción realizada correctamente!');
-    resetForm();
-    setUsuarioSeleccionado(null);
-    setAccion('');
   };
 
-  const handlePasswordSubmit = (values, { resetForm }) => {
-    setMensajeExito('¡La contraseña ha sido cambiada exitosamente!');
-    resetForm();
-  };
-
-  const seleccionarUsuario = (usuario, accionSeleccionada) => {
+  // Función para manejar la edición de un usuario
+  const handleEditUsuario = (usuario) => {
     setUsuarioSeleccionado(usuario);
-    setAccion(accionSeleccionada);
+    setAccion('editarPerfil'); // Cambia la acción para mostrar el formulario de edición
     setMensajeExito('');
+    setMensajeError('');
   };
+
+  // Función para manejar el cambio de contraseña
+  const handleChangePassword = (usuario) => {
+    setUsuarioSeleccionado(usuario);
+    setAccion('cambiarContrasena'); // Establece la acción para mostrar el formulario de cambio de contraseña
+    setMensajeExito('');
+    setMensajeError('');
+  };
+
+  const handleChangePasswordSubmit = async (values) => {
+    try {
+      await axiosInstance.put(`/usuarios/${usuarioSeleccionado.id}/contrasena`, {
+        contrasena: values.contrasena,
+      });
+      setMensajeExito('Contraseña cambiada correctamente');
+      setAccion('');
+      setUsuarioSeleccionado(null);
+    } catch (error) {
+      setMensajeError('Error al cambiar la contraseña.');
+    }
+  };  
+
 
   return (
     <div className="container-fluid bg-light py-5">
       <div className="container">
         <h1 className="text-center text-primary mb-4">Gestión de Usuarios</h1>
 
+        {/* Botón para agregar usuario */}
         <div className="d-flex justify-content-start mb-4">
           <button
             className="btn btn-success"
             onClick={() => {
               setUsuarioSeleccionado(null);
-              setAccion('agregarUsuario');
+              setAccion('agregarUsuario'); // Establece la acción
               setMensajeExito('');
+              setMensajeError('');
             }}
           >
             Agregar Usuario
           </button>
         </div>
 
+        {/* Mensajes de éxito y error */}
+        {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
+        {mensajeError && <div className="alert alert-danger">{mensajeError}</div>}
+
+        {/* Formulario para agregar/editar usuario */}
         {(accion === 'agregarUsuario' || accion === 'editarPerfil') && (
           <div className="card shadow-lg mb-4">
             <div className="card-body">
               <h5 className="card-title text-center text-info mb-4">
-                {accion === 'agregarUsuario' ? 'Agregar Usuario' : `Editar Perfil de ${usuarioSeleccionado.nombre1}`}
+              {accion === 'agregarUsuario' && 'Agregar Usuario'}
+              {accion === 'editarPerfil' && `Editar Perfil de ${usuarioSeleccionado?.nombre}`}
+              {accion === 'cambiarContrasena' && `Cambiar Contraseña de ${usuarioSeleccionado?.nombre}`}
               </h5>
-              <Formik
-                initialValues={{
-                  rut: usuarioSeleccionado?.rut || '',
-                  apellido1: usuarioSeleccionado?.apellido1 || '',
-                  apellido2: usuarioSeleccionado?.apellido2 || '',
-                  nombre1: usuarioSeleccionado?.nombre1 || '',
-                  carrera: usuarioSeleccionado?.carrera || '',
-                  telefono: usuarioSeleccionado?.telefono || '',
-                  email: usuarioSeleccionado?.email || '',
-                  rol: usuarioSeleccionado?.rol || '',
-                }}
-                validationSchema={validationSchemaPerfil}
-                onSubmit={handlePerfilSubmit}
-              >
-                {({ isSubmitting }) => (
-                  <Form>
-                    <div className="row">
-                      <div className="col-12 col-md-6 mb-3">
-                        <label htmlFor="rut" className="form-label">RUT (Sin puntos ni guión)</label>
-                        <Field type="text" id="rut" name="rut" className="form-control" />
+
+              {/* Formulario para Agregar o Editar Perfil */}
+              {accion === 'agregarUsuario' || accion === 'editarPerfil' ? (
+                <Formik
+                  initialValues={{
+                    rut: usuarioSeleccionado?.rut || '',
+                    nombre: usuarioSeleccionado?.nombre || '',
+                    carrera: usuarioSeleccionado?.carrera || '',
+                    telefono: usuarioSeleccionado?.telefono || '',
+                    email: usuarioSeleccionado?.email || '',
+                    rol: usuarioSeleccionado?.rol || '',
+                    contrasena: usuarioSeleccionado?.contrasena || '',
+                  }}
+                  validationSchema={validationSchemaPerfil}
+                  onSubmit={handlePerfilSubmit}
+                >
+                  {({ isSubmitting }) => (
+                    <Form>
+                      {/* Campos del formulario */}
+                      <div className="mb-3">
+                        <label htmlFor="rut" className="form-label">
+                          RUT
+                        </label>
+                        <Field type="text" name="rut" className="form-control" />
                         <ErrorMessage name="rut" component="div" className="text-danger" />
                       </div>
-                      <div className="col-12 col-md-6 mb-3">
-                        <label htmlFor="apellido1" className="form-label">Primer Apellido</label>
-                        <Field type="text" id="apellido1" name="apellido1" className="form-control" />
-                        <ErrorMessage name="apellido1" component="div" className="text-danger" />
+                      <div className="mb-3">
+                        <label htmlFor="nombre" className="form-label">
+                          Nombre Completo
+                        </label>
+                        <Field type="text" name="nombre" className="form-control" />
+                        <ErrorMessage name="nombre" component="div" className="text-danger" />
                       </div>
-                      <div className="col-12 col-md-6 mb-3">
-                        <label htmlFor="apellido2" className="form-label">Segundo Apellido</label>
-                        <Field type="text" id="apellido2" name="apellido2" className="form-control" />
+                      <div className="mb-3">
+                        <label htmlFor="carrera" className="form-label">
+                          Carrera
+                        </label>
+                        <Field type="text" name="carrera" className="form-control" />
+                        <ErrorMessage name="carrera" component="div" className="text-danger" />
                       </div>
-                      <div className="col-12 col-md-6 mb-3">
-                        <label htmlFor="nombre1" className="form-label">Primer Nombre</label>
-                        <Field type="text" id="nombre1" name="nombre1" className="form-control" />
-                        <ErrorMessage name="nombre1" component="div" className="text-danger" />
+                      <div className="mb-3">
+                        <label htmlFor="telefono" className="form-label">
+                          Teléfono
+                        </label>
+                        <Field type="text" name="telefono" className="form-control" />
+                        <ErrorMessage name="telefono" component="div" className="text-danger" />
                       </div>
-                      <div className="col-12 col-md-6 mb-3">
-                        <label htmlFor="carrera" className="form-label">Carrera</label>
-                        <Field type="text" id="carrera" name="carrera" className="form-control" />
-                      </div>
-                      <div className="col-12 col-md-6 mb-3">
-                        <label htmlFor="telefono" className="form-label">Teléfono</label>
-                        <Field type="text" id="telefono" name="telefono" className="form-control" />
-                      </div>
-                      <div className="col-12 col-md-6 mb-3">
-                        <label htmlFor="email" className="form-label">Correo</label>
-                        <Field type="email" id="email" name="email" className="form-control" />
+                      <div className="mb-3">
+                        <label htmlFor="email" className="form-label">
+                          Correo
+                        </label>
+                        <Field type="email" name="email" className="form-control" />
                         <ErrorMessage name="email" component="div" className="text-danger" />
                       </div>
-                    </div>
-                    <div className="d-flex justify-content-center">
-                      <button
-                        type="submit"
-                        className="btn btn-primary btn-lg"
-                        disabled={isSubmitting}
-                      >
-                        {accion === 'agregarUsuario' ? 'Agregar Usuario' : 'Guardar Cambios'}
-                      </button>
-                    </div>
-                  </Form>
-                )}
+                      <div className="mb-3">
+                        <label htmlFor="rol" className="form-label">
+                          Rol
+                        </label>
+                        <Field as="select" name="rol" className="form-select">
+                          <option value="">Seleccionar...</option>
+                          <option value="SuperAdmin">Jefe de Carrera</option>
+                          <option value="Panolero">Pañolero</option>
+                          <option value="CoordinadorCarrera">Coordinador de Carrera</option>
+                          <option value="UsuarioF">Docente/Estudiante</option>
+                        </Field>
+                        <ErrorMessage name="rol" component="div" className="text-danger" />
+                      </div>
+                      <div className="d-flex justify-content-center">
+                        <button
+                          type="submit"
+                          className="btn btn-primary"
+                          disabled={isSubmitting}
+                        >
+                          {accion === 'agregarUsuario' ? 'Agregar Usuario' : 'Guardar Cambios'}
+                        </button>
+                      </div>
+                    </Form>
+                  )}
               </Formik>
+              ) : null}
             </div>
           </div>
         )}
 
-        {accion === 'cambiarContraseña' && (
+        {accion === 'cambiarContrasena' && (
           <div className="card shadow-lg mb-4">
             <div className="card-body">
-              <h5 className="card-title text-center text-success mb-4">
-                Cambiar Contraseña de {usuarioSeleccionado.nombre1}
-              </h5>
+              <h5 className="card-title text-center text-info mb-4">Cambiar Contraseña de {usuarioSeleccionado?.nombre}</h5>
               <Formik
                 initialValues={{
-                  passwordActual: '',
-                  nuevaPassword: '',
-                  confirmarPassword: '',
+                  contrasena: '', // Solo la nueva contraseña
                 }}
-                validationSchema={validationSchemaPassword}
-                onSubmit={handlePasswordSubmit}
+                validationSchema={Yup.object({
+                  contrasena: Yup.string().required('La contraseña es obligatoria'),
+                })}
+                onSubmit={handleChangePasswordSubmit}
               >
                 {({ isSubmitting }) => (
                   <Form>
-                    {userRole !== 'SuperAdmin' && (
-                      <div className="mb-3">
-                        <label htmlFor="passwordActual" className="form-label">Contraseña Actual</label>
-                        <Field type="password" id="passwordActual" name="passwordActual" className="form-control" />
-                        <ErrorMessage name="passwordActual" component="div" className="text-danger" />
-                      </div>
-                    )}
                     <div className="mb-3">
-                      <label htmlFor="nuevaPassword" className="form-label">Nueva Contraseña</label>
-                      <Field type="password" id="nuevaPassword" name="nuevaPassword" className="form-control" />
-                      <ErrorMessage name="nuevaPassword" component="div" className="text-danger" />
+                      <label htmlFor="contrasena" className="form-label">Nueva Contraseña</label>
+                      <Field type="password" name="contrasena" className="form-control" />
+                      <ErrorMessage name="contrasena" component="div" className="text-danger" />
                     </div>
-                    <div className="mb-3">
-                      <label htmlFor="confirmarPassword" className="form-label">Confirmar Contraseña</label>
-                      <Field type="password" id="confirmarPassword" name="confirmarPassword" className="form-control" />
-                      <ErrorMessage name="confirmarPassword" component="div" className="text-danger" />
-                    </div>
-                    <div className="d-flex justify-content-center">
-                      <button
-                        type="submit"
-                        className="btn btn-success btn-lg"
-                        disabled={isSubmitting}
-                      >
-                        Cambiar Contraseña
-                      </button>
-                    </div>
+                    <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                      Cambiar Contraseña
+                    </button>
                   </Form>
                 )}
               </Formik>
@@ -210,27 +250,32 @@ const UserManagement = ({ userRole }) => {
           </div>
         )}
 
+        {/* Lista de usuarios */}
         <div className="row">
           {usuarios.map((usuario) => (
             <div key={usuario.id} className="col-12 col-md-6 col-lg-4 mb-4">
               <div className="card">
                 <div className="card-body">
-                  <h5 className="card-title text-center">{usuario.nombre1} {usuario.apellido1}</h5>
+                  <h5 className="card-title text-center">
+                    {usuario.nombre}
+                  </h5>
                   <p className="card-text">
                     <strong>RUT:</strong> {usuario.rut} <br />
                     <strong>Correo:</strong> {usuario.email} <br />
                     <strong>Rol:</strong> {usuario.rol}
                   </p>
+
+                  {/* Botones de Editar y Cambiar Contraseña */}
                   <div className="d-flex justify-content-between">
                     <button
-                      className="btn btn-outline-primary"
-                      onClick={() => seleccionarUsuario(usuario, 'editarPerfil')}
+                      className="btn btn-warning"
+                      onClick={() => handleEditUsuario(usuario)}
                     >
-                      Editar Perfil
+                      Editar
                     </button>
                     <button
-                      className="btn btn-outline-danger"
-                      onClick={() => seleccionarUsuario(usuario, 'cambiarContraseña')}
+                      className="btn btn-info"
+                      onClick={() => handleChangePassword(usuario)}
                     >
                       Cambiar Contraseña
                     </button>
@@ -240,8 +285,6 @@ const UserManagement = ({ userRole }) => {
             </div>
           ))}
         </div>
-
-        {mensajeExito && <div className="alert alert-success mt-4">{mensajeExito}</div>}
       </div>
     </div>
   );

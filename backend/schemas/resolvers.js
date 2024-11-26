@@ -1,5 +1,5 @@
 const { get } = require('lodash');
-const {Estudiante, Usuario, Docente, Carrera, Sede, Item, Ciudad, Comuna, Region, Prestamo} = require('../models/modelSchemas');
+const {UsuarioF, Usuario, Carrera, Sede, Item, Ciudad, Comuna, Region, Prestamo} = require('../models/modelSchemas');
 const { getEnterLeaveForKind } = require('graphql');
 
 // Para borrar datos de prueba
@@ -344,90 +344,42 @@ const resolvers = {
             }
         },
         // Querys de Usuarios
-        async getEstudiantes (obj) {
+        async getUsuarioFs (obj) {
             try{
-                const estudiantes = await Estudiante.find();
-                return estudiantes;
+                const usuarioFs = await UsuarioF.find();
+                return usuarioFs;
             } catch (error) {
-                throw new Error(`Error: Estudiantes no encontrados: ${error.message}`);
+                throw new Error(`Error: UsuarioFs no encontrados: ${error.message}`);
             }
         },
-        async getEstudiante (obj, { id }) {
+        async getUsuarioF (obj, { id }) {
             try{
-                const estudiante = await Estudiante.findById(id);
-                return estudiante;
+                const usuarioF = await UsuarioF.findById(id);
+                return usuarioF;
             } catch (error) {
-                throw new Error(`Error: Estudiante no encontrado: ${error.message}`);
+                throw new Error(`Error: UsuarioF no encontrado: ${error.message}`);
             }
         },
-        async getEstudiantesByCarrera (obj, { carrera }) {
+        async getUsuarioFsByCarrera (obj, { carrera }) {
             try{
-                const estudiantes = await Estudiante.find({'carrera.nombre': carrera});
-                return estudiantes;
+                const usuarioFs = await UsuarioF.find({'carrera.nombre': carrera});
+                return usuarioFs;
             } catch (error) {  
                 throw new Error(`Error: Carrera: ${error.message}`);
             }
         },
-        async getEstudiantesByNombre (obj, { nombre }) {
+        async getUsuarioFsByNombre (obj, { nombre }) {
             try{
-                const estudiantes = await Estudiante.find({nombre: nombre});
-                return estudiantes;
+                const usuarioFs = await UsuarioF.find({nombre: nombre});
+                return usuarioFs;
             } catch (error) {
                 throw new Error(`Error: Nombre: ${error.message}`);
             }
         },
-        async getEstudianteByRut (obj, { rut }) {
+        async getUsuarioFByRut (obj, { rut }) {
             try{
-                const estudiante = await Estudiante.findOne({'usuario.rut': rut});
-                return estudiante;
-            } catch (error) {
-                throw new Error(`Error: Rut: ${error.message}`);
-            }
-        },
-        async getDocentes (obj) {
-            try{
-                const docentes = await Docente.find();
-                return docentes;
-            } catch (error) {
-                throw new Error(`Error: Docentes no encontrados: ${error.message}`);
-            }
-        },
-        async getDocente (obj, { id }) {
-            try{
-                const docente = await Docente.findById(id);
-                return docente;
-            } catch (error) {
-                throw new Error(`Error: Docente no encontrado: ${error.message}`);
-            }
-        },
-        async getDocentesByEscuela (obj, { escuela }) {
-            try{
-                const docentes = await Docente.find({'escuela.nombre': escuela});
-                return docentes;
-            } catch (error) {
-                throw new Error(`Error: Escuela: ${error.message}`);
-            }
-        },
-        async getDocentesByNombre (obj, { nombre }) {
-            try{
-                const docentes = await Docente.find({nombre: nombre});
-                return docentes;
-            } catch (error) {
-                throw new Error(`Error: Nombre: ${error.message}`);
-            }
-        },
-        async getDocentesByRamo (obj, { ramo }) {
-            try{
-                const docentes = await Docente.find({'ramo.nombre': ramo});
-                return docentes;
-            } catch (error) {
-                throw new Error(`Error: Ramo: ${error.message}`);
-            }
-        },
-        async getDocenteByRut (obj, { rut }) {
-            try{
-                const docente = await Docente.findOne({'usuario.rut': rut});
-                return docente;
+                const usuarioF = await UsuarioF.findOne({'usuario.rut': rut});
+                return usuarioF;
             } catch (error) {
                 throw new Error(`Error: Rut: ${error.message}`);
             }
@@ -675,9 +627,9 @@ const resolvers = {
         
                 await prestamo.save();
         
-                // Buscar el préstamo por ID y hacer el populate de estudiante y equipo
+                // Buscar el préstamo por ID y hacer el populate de UsuarioF y equipo
                 const prestamoConDatos = await Prestamo.findById(prestamo._id)
-                    .populate('usuario')  // Poblamos el campo estudiante
+                    .populate('usuario')  // Poblamos el campo UsuarioF
                     .populate('item')    // Poblamos el campo equipo
                     .populate('sede');     // Poblamos el campo sede
 
@@ -781,7 +733,7 @@ const resolvers = {
             }
         },
         // Mutations de Usuarios
-        async addEstudiante(parent, { input }) {
+        async addUsuarioF(parent, { input }) {
             try {
                 // Verifica que el ID del usuario exista en la colección de usuarios
                 const usuarioExistente = await Usuario.findById(input.usuario);
@@ -789,66 +741,39 @@ const resolvers = {
                     throw new Error('El usuario proporcionado no existe.');
                 }
         
-                // Crea el estudiante, asociando el ID del usuario proporcionado
-                const estudiante = new Estudiante({ ...input, usuario: input.usuario });
-                await estudiante.save();
+                // Crea el UsuarioF, asociando el ID del usuario proporcionado
+                const usuarioF = new UsuarioF({
+                    usuario: input.usuario,
+                    carrera: input.carrera
+                });
+                await usuarioF.save();
         
-                // Devuelve el estudiante con los datos del usuario populados
-                const estudianteConUsuario = await Estudiante.findById(estudiante._id).populate('usuario').populate('carrera');
-                return estudianteConUsuario;
+                // Devuelve el UsuarioF con los datos del usuario populados
+                const usuarioFConUsuario = await UsuarioF.findById(usuarioF._id)
+                    .populate('usuario') // Asegúrate de que 'usuario' es el campo definido en el esquema
+                    .populate('carrera'); // Asegúrate de que 'carrera' es el campo definido en el esquema
+                return usuarioFConUsuario;
         
             } catch (error) {
-                throw new Error(`Error al agregar el estudiante: ${error.message}`);
+                throw new Error(`Error al agregar el UsuarioF: ${error.message}`);
             }
         },
-        async updateEstudiante(parent, { id, input }) {
+        async updateUsuarioF(parent, { id, input }) {
             try{
-            const estudiante = await Estudiante.findByIdAndUpdate(id, input, { new: true });
-            return estudiante;
+            const usuarioF = await UsuarioF.findByIdAndUpdate(id, input, { new: true });
+            return usuarioF;
             } catch (error) {
-                throw new Error(`Error al actualizar el estudiante: ${error.message}`);
+                throw new Error(`Error al actualizar el UsuarioF: ${error.message}`);
             }
         },
-        async deleteEstudiante(parent, { id }) {
+        async deleteUsuarioF(parent, { id }) {
             try{
-            await Estudiante.findByIdAndDelete(id);
-            return { message: 'Estudiante eliminado' };
+            await UsuarioF.findByIdAndDelete(id);
+            return { message: 'UsuarioF eliminado' };
             } catch (error) {
-                throw new Error(`Error al eliminar el estudiante: ${error.message}`);
+                throw new Error(`Error al eliminar el UsuarioF: ${error.message}`);
             }
         },
-        async addDocente(parent, { input }) {
-            try{
-            const usuario = new Usuario(input.usuario);
-            await usuario.save();
-
-            const docente = new Docente({ ...input, usuario: usuario._id });
-            await docente.save();
-
-            const docenteConUsuario = await Docente.findById(docente._id).populate('usuario');
-            return docenteConUsuario;
-
-            } catch (error) {
-                throw new Error(`Error al agregar el docente: ${error.message}`);
-            }
-        },
-        async updateDocente(parent, { id, input }) {
-            try{
-            const docente = await Docente.findByIdAndUpdate(id, input, { new: true });
-            return docente;
-            } catch (error) {
-                throw new Error(`Error al actualizar el docente: ${error.message}`);
-            }
-        },
-        async deleteDocente(parent, { id }) {
-            try{
-            await Docente.findByIdAndDelete(id);
-            return { message: 'Docente eliminado' };
-            } catch (error) {
-                throw new Error(`Error al eliminar el docente: ${error.message}`);
-            }
-        },
-        
         async addUsuario(parent, { input }) {
             try{
             const usuario = new Usuario(input);

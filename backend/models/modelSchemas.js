@@ -29,22 +29,17 @@ const carreraSchema = new mongoose.Schema({
 
 // A quien se le presta
 const usuarioSchema = new mongoose.Schema({
-    nombre: { type: String, required: true },  // Asegúrate de que el nombre sea obligatorio
-    rut: { type: String, required: true },     // El rut también es obligatorio
-    email: { type: String, required: true },   // Asegúrate de que el email sea obligatorio
-    contrasena: String,
-    telefono: { type: String, required: true }, // El teléfono también debería ser obligatorio
+    nombre: { type: String, required: true },
+    rut: { type: String, required: true },
+    email: { type: String, required: true }, 
+    contrasena: { type: String, required: true },
+    telefono: { type: String, required: true },
+    rol: { type: String, enum: ['UsuarioF', 'Panolero', 'SuperAdmin', 'CoordinadorCarrera'], required: true }
 });
 
-const estudianteSchema = new mongoose.Schema({
+const usuarioFSchema = new mongoose.Schema({
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },  // Referencia a Usuario
-    carrera: { type: mongoose.Schema.Types.ObjectId, ref: 'Carrera', required: true }  // Carrera del estudiante
-});
-const docenteSchema = new mongoose.Schema({
-    ramo: String,
-    escuela: String,
-    usuario: usuarioSchema,
-    sede: sedeSchema
+    carrera: { type: mongoose.Schema.Types.ObjectId, ref: 'Carrera', required: true }  // Carrera del UsuarioF
 });
 
 // Que se presta
@@ -66,8 +61,7 @@ const prestamoSchema = new mongoose.Schema({
 });
 
 // Usuarios de pañol
-const Estudiante = mongoose.model('Estudiante', estudianteSchema);
-const Docente = mongoose.model('Docente', docenteSchema);
+const UsuarioF = mongoose.model('UsuarioF', usuarioFSchema);
 const Usuario = mongoose.model('Usuario', usuarioSchema);
 
 const Carrera = mongoose.model('Carrera', carreraSchema);
@@ -84,4 +78,4 @@ const Region = mongoose.model('Region', regionSchema);
 // Prestamos
 const Prestamo = mongoose.model('Prestamo', prestamoSchema);
 
-module.exports = {Estudiante, Usuario, Docente, Carrera, Sede, Item, Ciudad, Comuna, Region, Prestamo };
+module.exports = {UsuarioF, Usuario, Carrera, Sede, Item, Ciudad, Comuna, Region, Prestamo };
